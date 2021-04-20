@@ -2,8 +2,6 @@ import hashlib
 import random
 import time
 
-from account.serializers import UserSerializer
-from django.contrib.auth.models import User
 from equipment.models import Equipment
 from equipment.serializers import EquipmentSerializer
 from rest_framework.response import Response
@@ -98,11 +96,11 @@ class EquipmentView(APIView):
             response_dict['data'] = serializer.data
             return Response(response_dict)
         elif request.user in equipment.users.all():
-            request_data = request.data
-            equipment.name_brief = request_data['name_brief']
-            equipment.descript = request_data['descript']
-            equipment.save()
             serializer = EquipmentSerializer(equipment)
+            equipment_data = serializer.data
+            equipment_data['name_brief'] = request.data['name_brief']
+            equipment_data['descript'] = request.data['descript']
+            serializer.update(equipment, equipment_data, modifier=request.user)
             response_dict['code'] = 201
             response_dict['message'] = 'Updated successfully!'
             response_dict['data'] = serializer.data
