@@ -1,9 +1,10 @@
 from account.serializers import BriefUserSerializer, UserSerializer
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, logout
+from rest_framework import generics, mixins, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework import generics, mixins, permissions, status
+from rest_framework.views import APIView
 
 
 def jwt_response_payload_handler(token, user=None, request=None):
@@ -13,13 +14,12 @@ def jwt_response_payload_handler(token, user=None, request=None):
     serialized representation of the User.
     """
     return {
-        'user': UserSerializer(user, context={'request': request}).data,
+        'user': BriefUserSerializer(user, context={'request': request}).data,
         'token': 'JWT ' + token
     }
 
 
-class CreateUser(mixins.CreateModelMixin,
-                 generics.GenericAPIView):
+class CreateUser(APIView):
     '''
     Create a new User, must have administrator privileges.
     '''
