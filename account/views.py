@@ -1,6 +1,6 @@
 from account.serializers import BriefUserSerializer, UserSerializer
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, logout
+from django.contrib.auth import authenticate, login, logout
 from rest_framework import generics, mixins, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -13,6 +13,7 @@ def jwt_response_payload_handler(token, user=None, request=None):
     Override to return a custom response such as including the
     serialized representation of the User.
     """
+    login(request, user)
     return {
         'user': BriefUserSerializer(user, context={'request': request}).data,
         'token': 'JWT ' + token
