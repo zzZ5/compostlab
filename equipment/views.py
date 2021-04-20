@@ -1,18 +1,14 @@
-from re import error
-from equipment.admin import EquipmentAdmin
 import hashlib
 import random
 import time
 
 from account.serializers import UserSerializer
 from django.contrib.auth.models import User
-from django.shortcuts import render
 from equipment.models import Equipment
 from equipment.serializers import EquipmentSerializer
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics, mixins, permissions, status
+from rest_framework import permissions, status
 
 
 def _get_random_secret_key(length=15, allowed_chars=None, secret_key=None):
@@ -42,8 +38,7 @@ def _get_random_secret_key(length=15, allowed_chars=None, secret_key=None):
     return ret
 
 
-class CreateEquipment(mixins.CreateModelMixin,
-                      generics.GenericAPIView):
+class CreateEquipment(APIView):
     '''
     Create a new Equipment, must have administrator privileges.
     '''
@@ -97,7 +92,7 @@ class EquipmentView(APIView):
 
         if request.user.is_superuser or equipment.owner == request.user:
             serializer = EquipmentSerializer(equipment)
-            serializer.update(equipment, request.data)
+            serializer.update(equipment, request.data, modifier=request.user)
             response_dict['code'] = 201
             response_dict['message'] = 'Updated successfully!'
             response_dict['data'] = serializer.data

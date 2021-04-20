@@ -23,7 +23,7 @@ class Equipment(models.Model):
     owner = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.DO_NOTHING, related_name='%(class)s_created')
     users = models.ManyToManyField(
-        User, null=True, blank=True,  related_name='%(class)s_inuse')
+        User, blank=True,  related_name='%(class)s_inuse')
 
     def users_display(self):
         return str(self.users)
@@ -42,17 +42,17 @@ class Equipment(models.Model):
         verbose_name_plural = "Equipments"
 
 
-class EquipmentUsageRecord():
+class EquipmentUsageRecord(models.Model):
 
     users = models.ManyToManyField(
-        User, null=True, related_name='%(class)s_used')
+        User, related_name='%(class)s_used')
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
     begin_time = models.DateTimeField(null=False)
     end_time = models.DateTimeField(null=False)
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return self.end_time
 
     class Meta:
         ordering = ["-created_time"]
@@ -60,22 +60,17 @@ class EquipmentUsageRecord():
         verbose_name_plural = "EquipmentUsageRecords"
 
 
-class EquipmentHistoricalRecord():
+class EquipmentHistoricalRecord(models.Model):
 
     modifier = models.ForeignKey(
         User, null=True, on_delete=models.DO_NOTHING, related_name='%(class)s_modified')
-    name = models.CharField(max_length=128, unique=True)
-    name_brief = models.CharField(max_length=64, unique=True, null=True)
-    key = models.CharField(max_length=16, unique=True, null=True)
-    descript = models.CharField(max_length=256, null=True)
-    created_time = models.DateTimeField(auto_now_add=True)
-    owner = models.ForeignKey(
-        User, on_delete=models.DO_NOTHING, null=True)
     equipment = models.ForeignKey(
         Equipment, null=True, on_delete=models.CASCADE)
+    record = models.CharField(max_length=256, blank=True)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return self.record
 
     class Meta:
         ordering = ["-created_time"]
@@ -105,16 +100,12 @@ class SensorHistoricalRecord(models.Model):
 
     modifier = models.ForeignKey(
         User, null=True, on_delete=models.DO_NOTHING, related_name='%(class)s_modified')
-    name = models.CharField(max_length=128, unique=True)
-    key = models.CharField(max_length=16, unique=True, null=True)
-    descript = models.CharField(max_length=256, null=True)
-    equipment = models.ForeignKey(
-        Equipment, null=True, on_delete=models.DO_NOTHING)
-    created_time = models.DateTimeField(auto_now_add=True)
     sensor = models.ForeignKey(Sensor, null=True, on_delete=models.CASCADE)
+    record = models.CharField(max_length=256, blank=True)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return self.record
 
     class Meta:
         ordering = ["-created_time"]

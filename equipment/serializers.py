@@ -1,3 +1,5 @@
+from django.db.models.query import InstanceCheckMeta
+import equipment
 from rest_framework import serializers
 from account.serializers import BriefUserSerializer
 from django.contrib.auth.models import User
@@ -19,6 +21,17 @@ def _get_user(id='', username='', email='', *args, **kwargs):
     return user
 
 
+def _save_equipment_record(name, old, new, modifier, equipment):
+    if old != new:
+        record = 'Changed the {} from {} to {}'.format(
+            name, old, new)
+        EquipmentHistoricalRecord.objects.create(
+            modifier=modifier, equipment=equipment, record=record)
+        return True
+    else:
+        return False
+
+
 class EquipmentSerializer(serializers.ModelSerializer):
     owner = BriefUserSerializer(required=False)
     users = BriefUserSerializer(required=False, many=True)
@@ -26,27 +39,52 @@ class EquipmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Equipment
         fields = ('id', 'name', 'name_brief', 'key',
-                  'type', 'descript', 'begin_time', 'end_time', 'users', 'owner')
+                  'type', 'descript', 'begin_time', 'end_time',
+                  'created_time', 'users', 'owner')
         depth = 1
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data, modifier):
+
         owner_data = validated_data.pop('owner')
         owner = _get_user(**owner_data)
+        if _save_equipment_record('owner', instance.owner, owner, modifier, instance):
+            instance.owner = owner
+
         users_data = validated_data.pop('users')
         users = []
         for i in users_data:
             users.append(_get_user(**i))
+        if _save_equipment_record('users', list(instance.users.all()), users, modifier, instance):
+            instance.users.set(users)
 
-        instance.name = validated_data.get('name', instance.name)
-        instance.name_brief = validated_data.get('email', instance.name_brief)
-        instance.key = validated_data.get('key', instance.key)
-        instance.type = validated_data.get('type', instance.type)
-        instance.descript = validated_data.get('descript', instance.descript)
-        instance.begin_time = validated_data.get(
-            'begin_time', instance.begin_time)
-        instance.end_time = validated_data.get('end_time', instance.end_time)
-        instance.owner = owner
-        instance.users.set(users)
+        name = validated_data.get('name', instance.name)
+        if _save_equipment_record('name', instance.name, name, modifier, instance):
+            instance.name = name
+
+        name_brief = validated_data.get('name_brief', instance.name_brief)
+        if _save_equipment_record('name_brief', instance.name_brief, name_brief, modifier, instance):
+            instance.name_brief = name_brief
+
+        key = validated_data.get('key', instance.key)
+        if _save_equipment_record('key', instance.key, key, modifier, instance):
+            instance.key = key
+
+        type = validated_data.get('type', instance.type)
+        if _save_equipment_record('type', instance.type, type, modifier, instance):
+            instance.type = type
+
+        descript = validated_data.get('descript', instance.descript)
+        if _save_equipment_record('descript', instance.descript, descript, modifier, instance):
+            instance.descript = descript
+
+        begin_time = validated_data.get('begin_time', instance.begin_time)
+        if _save_equipment_record('begin_time', instance.begin_time, begin_time, modifier, instance):
+            instance.begin_time = begin_time
+
+        end_time = validated_data.get('end_time', instance.end_time)
+        if _save_equipment_record('end_time', instance.end_time, end_time, modifier, instance):
+            instance.end_time = end_time
+
         instance.save()
         return instance
 
@@ -58,24 +96,6 @@ class EquipmentUsageRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = EquipmentUsageRecord
         fields = ('id', 'begin_time', 'end_time', 'user', 'equpment')
-        depth = 1
-
-    def create(self, validated_data):
-        profile_data = validated_data.pop('profile')
-        user = User.objects.create(**validated_data)
-        Profile.objects.create(user=user, **profile_data)
-        return user
-
-
-class EquipmentHistoryRecordSerializer(serializers.ModelSerializer):
-    owner = BriefUserSerializer(required=False)
-    modifier = BriefUserSerializer(required=False)
-    equipment = EquipmentSerializer(required=False)
-
-    class Meta:
-        model = EquipmentHistoricalRecord
-        fields = ('id', 'name', 'name_brief', 'key',
-                  'type', 'descript', 'equipment', 'owner', 'modifier')
         depth = 1
 
 
