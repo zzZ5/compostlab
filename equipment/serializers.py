@@ -1,5 +1,3 @@
-from django.db.models.query import InstanceCheckMeta
-import equipment
 from rest_framework import serializers
 from account.serializers import BriefUserSerializer
 from django.contrib.auth.models import User
@@ -23,7 +21,7 @@ def _get_user(id='', username='', email='', *args, **kwargs):
 
 def _save_equipment_record(name, old, new, modifier, equipment):
     if old != new:
-        record = 'Changed the {} from {} to {}'.format(
+        record = 'Changed the "{}" from "{}" to "{}"'.format(
             name, old, new)
         EquipmentHistoricalRecord.objects.create(
             modifier=modifier, equipment=equipment, record=record)
@@ -96,6 +94,16 @@ class EquipmentUsageRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = EquipmentUsageRecord
         fields = ('id', 'begin_time', 'end_time', 'user', 'equpment')
+        depth = 1
+
+
+class EquipmentHistoricalRecordSerializer(serializers.ModelSerializer):
+    modifier = BriefUserSerializer(required=False)
+    # equipment = EquipmentSerializer(required=False)
+
+    class Meta:
+        model = EquipmentHistoricalRecord
+        fields = ('record', 'modifier', 'created_time')
         depth = 1
 
 
