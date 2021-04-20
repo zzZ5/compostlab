@@ -63,7 +63,7 @@ class EquipmentUsageRecord(models.Model):
 class EquipmentHistoricalRecord(models.Model):
 
     modifier = models.ForeignKey(
-        User, null=True, on_delete=models.DO_NOTHING, related_name='%(class)s_modified')
+        User, null=True, on_delete=models.DO_NOTHING)
     equipment = models.ForeignKey(
         Equipment, null=True, on_delete=models.CASCADE)
     record = models.CharField(max_length=256, blank=True)
@@ -99,7 +99,7 @@ class Sensor(models.Model):
 class SensorHistoricalRecord(models.Model):
 
     modifier = models.ForeignKey(
-        User, null=True, on_delete=models.DO_NOTHING, related_name='%(class)s_modified')
+        User, null=True, on_delete=models.DO_NOTHING)
     sensor = models.ForeignKey(Sensor, null=True, on_delete=models.CASCADE)
     record = models.CharField(max_length=256, blank=True)
     created_time = models.DateTimeField(auto_now_add=True)
