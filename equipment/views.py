@@ -83,7 +83,7 @@ class EquipmentCreate(APIView):
             # Successfully created
             serializer.save(owner=self.request.user, key=key)
             response_dict['code'] = 201
-            response_dict['message'] = 'Created successfully!'
+            response_dict['message'] = 'Created successfully'
             response_dict['data'] = serializer.data
             return Response(response_dict, status=status.HTTP_201_CREATED)
 
@@ -117,7 +117,7 @@ class EquipmentList(APIView):
         serializer = EquipmentSerializer(page_list, many=True)
 
         response_dict['code'] = 200
-        response_dict['message'] = 'Success!'
+        response_dict['message'] = 'Success'
         response_dict['current_page'] = page.page.number
         response_dict['num_pages'] = page.page.paginator.num_pages
         response_dict['page_size'] = page.page_size
@@ -143,7 +143,7 @@ class EquipmentDetail(APIView):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         equipment = self.get_object(pk)
         serializer = EquipmentSerializer(equipment)
-        response_dict['message'] = 'Success!'
+        response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(response_dict)
 
@@ -183,7 +183,7 @@ class EquipmentDetail(APIView):
             serializer = EquipmentSerializer(equipment)
             serializer.update(equipment, request.data, modifier=request.user)
             response_dict['code'] = 201
-            response_dict['message'] = 'Updated successfully!'
+            response_dict['message'] = 'Updated successfully'
             response_dict['data'] = serializer.data
             return Response(response_dict)
 
@@ -195,7 +195,7 @@ class EquipmentDetail(APIView):
             equipment_data['descript'] = request.data['descript']
             serializer.update(equipment, equipment_data, modifier=request.user)
             response_dict['code'] = 201
-            response_dict['message'] = 'Updated successfully!'
+            response_dict['message'] = 'Updated successfully'
             response_dict['data'] = serializer.data
             return Response(response_dict)
 
@@ -236,7 +236,7 @@ class EquipmentHistoricalRecordView(APIView):
         serializer = EquipmentHistoricalRecordSerializer(page_list, many=True)
 
         response_dict['code'] = 200
-        response_dict['message'] = 'Success!'
+        response_dict['message'] = 'Success'
         response_dict['current_page'] = page.page.number
         response_dict['page_size'] = page.page_size
         response_dict['num_pages'] = page.page.paginator.num_pages
