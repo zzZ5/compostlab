@@ -30,7 +30,7 @@ def custom_exception_handler(exc, context):
             response.data['message'] = "Internal service errors"
 
         elif response.status_code == 403:
-            response.data['message'] = "Access denied"
+            response.data['message'] = "Permission denied"
 
         elif response.status_code == 405:
             response.data['message'] = 'Request method error'
