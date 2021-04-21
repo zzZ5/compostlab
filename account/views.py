@@ -1,33 +1,21 @@
 from account.serializers import BriefUserSerializer, UserSerializer
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
-from rest_framework import generics, mixins, permissions, status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
+from django.contrib.auth import authenticate, logout
+from rest_framework import status
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.decorators import action
 from rest_framework.views import APIView
+from rest_framework.response import Response
 
 
-# def jwt_response_payload_handler(token, user=None, request=None):
-#     """
-#     Returns the response data for both the login and refresh views.
-#     Override to return a custom response such as including the
-#     serialized representation of the User.
-#     """
-#     login(request, user)
-#     return {
-#         'user': BriefUserSerializer(user, context={'request': request}).data,
-#         'token': 'JWT ' + token
-#     }
+class UserDetail(GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = BriefUserSerializer
+    permission_classes = (IsAuthenticated,)
 
-
-class CreateUser(APIView):
-    '''
-    Create a new User, must have administrator privileges.
-    '''
-
-    permission_classes = (permissions.IsAdminUser,)
-
-    def post(self, request, version, format=None):
+    @ action(methods=['post'], detail=False, url_path='register', permission_classes=[IsAdminUser])
+    def create_user(self, request, version, format=None):
         '''
         Create a new account through post.
         Example:
@@ -40,65 +28,79 @@ class CreateUser(APIView):
             if success, return user's profile.
         '''
 
-        serializer = UserSerializer(data=request.data)
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        serializer = UserSerializer(data=request.data)
+
         if serializer.is_valid():
             serializer.save()
             response_dict['code'] = 201
-            response_dict['message'] = 'Created successfully!'
+            response_dict['message'] = 'Created successfully'
             response_dict['data'] = serializer.data
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(data=response_dict, status=status.HTTP_201_CREATED)
         response_dict['code'] = 422
         response_dict['message'] = serializer.errors
         return Response(response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
+    @ action(methods=['get'], detail=False, url_path='mine')
+    def get_myself(self, request, version, format=None):
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        user = request.user
+        serializer = self.get_serializer(instance=user)
+        response_dict['message'] = 'Success'
+        response_dict['data'] = serializer.data
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
-class UserView(mixins.RetrieveModelMixin,
-               mixins.UpdateModelMixin,
-               generics.GenericAPIView):
-    '''
-    Get user's profile or update user's profile through user's id.
-    '''
+    @ action(methods=['get'], detail=True, url_path='info')
+    def get(self, request, version, pk, format=None):
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        user = self.get_object()
+        serializer = self.get_serializer(instance=user)
+        response_dict['message'] = 'Success'
+        response_dict['data'] = serializer.data
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
-    permission_classes = (permissions.IsAuthenticated,)
-    queryset = User.objects.all()
-    serializer_class = BriefUserSerializer
+    @ action(methods=['put'], detail=False)
+    def put(self, request, version, format=None):
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        serializer = self.get_serializer(instance=request.user)
+        if User.objects.filter(username=request.data['username']):
+            response_dict['code'] = 400
+            response_dict['message'] = 'Existing username'
+            return Response(data=response_dict, status=status.status.HTTP_400_BAD_REQUEST)
+        serializer.update(request.user, request.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def get(self, request, version, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    @ action(methods=['get'], detail=False, url_path='logout')
+    def log_out(self, request, version, format=None):
+        '''
+        Logout user.
+        '''
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        logout(request)
+        response_dict['message'] = 'Logout seccess'
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
-    def put(self, request, version, pk, *args, **kwargs):
-        if request.user.id == pk:
-            return self.update(request, *args, **kwargs)
-        return Response(data={'detail': 'Inconsistent users'}, status=status.status.HTTP_400_BAD_REQUEST)
+    @ action(methods=['post'], detail=False, url_path='changepassword')
+    def change_password(self, request, version, format=None):
+        '''
+        Change user's password.
+        '''
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        try:
+            user = authenticate(
+                username=request.user.username, password=request.data['password'])
+            if request.user != user:
+                response_dict['code'] = 400
+                response_dict['message'] = 'Inconsistent users'
+                return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
+            user.set_password(request.data['new_password'])
+            user.save()
+        except:
+            response_dict['code'] = 400
+            response_dict['message'] = 'Password error'
+            return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
 
-
-@api_view(['GET'])
-@permission_classes((permissions.IsAuthenticated,))
-def log_out(request, version):
-    '''
-    Logout user.
-    '''
-
-    logout(request)
-    return Response(data={'detail': 'Logout seccess!'}, status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-@permission_classes((permissions.IsAuthenticated,))
-def change_password(request, version):
-    '''
-    Change user's password.
-    '''
-    try:
-        user = authenticate(
-            username=request.POST.get('username'), password=request.POST.get('password'))
-        if request.user != user:
-            return Response(data={'detail': 'Inconsistent users'}, status=status.HTTP_400_BAD_REQUEST)
-        user.set_password(request.POST.get('new_password'))
-        user.save()
-    except:
-        return Response(data={}, status=status.HTTP_400_BAD_REQUEST)
-
-    serializer = UserSerializer(user)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = self.get_serializer(instance=user)
+        response_dict['message'] = 'Success!'
+        response_dict['data'] = serializer.data
+        return Response(response_dict, status=status.HTTP_200_OK)

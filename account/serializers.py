@@ -1,5 +1,16 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from account.models import UserRecord
+
+
+def _save_user_record(name, old, new):
+    if old != new:
+        record = 'Changed the "{}" from "{}" to "{}"'.format(
+            name, old, new)
+        UserRecord.objects.create(record=record)
+        return True
+    else:
+        return False
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,3 +31,16 @@ class BriefUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email', 'is_staff',
                   'is_superuser', 'last_login', 'date_joined')
+
+    def update(self, instance, validated_data):
+
+        username = validated_data.get('username', instance.username)
+        if _save_user_record('username', instance.username, username):
+            instance.username = username
+
+        email = validated_data.get('email', instance.email)
+        if _save_user_record('email', instance.email, email):
+            instance.email = email
+
+        instance.save()
+        return instance

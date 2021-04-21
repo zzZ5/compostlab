@@ -1,11 +1,13 @@
 from django.urls import path
-from rest_framework_jwt.views import obtain_jwt_token
+from compostlab.utils.jwt import obtain_jwt_token
 from account import views
+from rest_framework.routers import SimpleRouter
+
 
 urlpatterns = [
     path('login/', obtain_jwt_token),
-    path('logout/', views.log_out),
-    path('register/', views.CreateUser.as_view()),
-    path('changepassword/', views.change_password),
-    path('<pk>/', views.UserView.as_view()),
 ]
+
+router = SimpleRouter()
+router.register(prefix='', viewset=views.UserDetail)
+urlpatterns += router.urls
