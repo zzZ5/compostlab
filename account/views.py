@@ -7,17 +7,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
-def jwt_response_payload_handler(token, user=None, request=None):
-    """
-    Returns the response data for both the login and refresh views.
-    Override to return a custom response such as including the
-    serialized representation of the User.
-    """
-    login(request, user)
-    return {
-        'user': BriefUserSerializer(user, context={'request': request}).data,
-        'token': 'JWT ' + token
-    }
+# def jwt_response_payload_handler(token, user=None, request=None):
+#     """
+#     Returns the response data for both the login and refresh views.
+#     Override to return a custom response such as including the
+#     serialized representation of the User.
+#     """
+#     login(request, user)
+#     return {
+#         'user': BriefUserSerializer(user, context={'request': request}).data,
+#         'token': 'JWT ' + token
+#     }
 
 
 class CreateUser(APIView):
@@ -41,10 +41,16 @@ class CreateUser(APIView):
         '''
 
         serializer = UserSerializer(data=request.data)
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
         if serializer.is_valid():
             serializer.save()
+            response_dict['code'] = 201
+            response_dict['message'] = 'Created successfully!'
+            response_dict['data'] = serializer.data
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        response_dict['code'] = 422
+        response_dict['message'] = serializer.errors
+        return Response(response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
 class UserView(mixins.RetrieveModelMixin,
