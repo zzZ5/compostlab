@@ -26,7 +26,7 @@ class Equipment(models.Model):
         User, blank=True,  related_name='%(class)s_inuse')
 
     def users_display(self):
-        return str(self.users)
+        return "\n".join([user.username for user in self.users.all()])
 
     def is_inuse(self):
         if self.end_time:

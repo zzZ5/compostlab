@@ -1,25 +1,32 @@
 from django.contrib import admin
-from equipment.models import Equipment
+from equipment.models import Equipment, EquipmentHistoricalRecord
 
 
 class EquipmentAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'name_brief', 'key',
+    list_display = ('name', 'name_brief', 'pk', 'key',
                     'type', 'descript', 'begin_time',
                     'end_time', 'created_time', 'owner', 'users_display', 'is_inuse')
-    list_filter = ['created_time']
+    list_filter = ['owner', 'created_time']
     fieldsets = [
-        ('equipment_name', {'fields': ['name']}),
-        ('equipment_name_brief', {'fields': ['name_brief']}),
-        ('type', {'fields': ['type']}),
-        ('descript', {'fields': ['descript']}),
-        ('key', {'fields': ['key']}),
-        ('begin_time', {'fields': ['begin_time']}),
-        ('end_time', {'fields': ['end_time']}),
-        ('users', {'fields': ['users']}),
+        ('equipment name', {'fields': ['name', 'name_brief']}),
+        ('equipment information', {'fields': ['type', 'descript', 'key']}),
+        ('usage information', {'fields': ['begin_time', 'end_time', 'users']}),
         ('owner', {'fields': ['owner']}),
+        ('created_time', {'fields': ['created_time']}),
+    ]
+    readonly_fields = ['created_time', 'key']
+
+
+class EquipmentHistoryRecordAdmin(admin.ModelAdmin):
+    list_display = ('equipment',  'record', 'modifier', 'created_time')
+    list_filter = ['equipment', 'modifier', 'created_time']
+    fieldsets = [
+        ('modify information', {'fields': ['equipment', 'record']}),
+        ('modifier', {'fields': ['modifier']}),
         ('created_time', {'fields': ['created_time']}),
     ]
     readonly_fields = ['created_time']
 
 
 admin.site.register(Equipment, EquipmentAdmin)
+admin.site.register(EquipmentHistoricalRecord, EquipmentHistoryRecordAdmin)
