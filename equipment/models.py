@@ -7,7 +7,7 @@ from django.utils import timezone
 class Equipment(models.Model):
 
     name = models.CharField(max_length=128, unique=True)
-    name_brief = models.CharField(max_length=64, unique=True, null=True)
+    name_brief = models.CharField(max_length=64, null=True)
     key = models.CharField(max_length=16, unique=True, null=True)
 
     REACTOR = 'RE'

@@ -9,6 +9,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.decorators import action
 
 
 def _get_random_secret_key(length=15, allowed_chars=None, secret_key=None):
@@ -52,14 +54,13 @@ class RecordPagination(PageNumberPagination):
     max_page_size = 100
 
 
-class EquipmentCreate(APIView):
-    '''
-    Create a new Equipment, must have administrator privileges.
-    '''
+class EquipmentViewSet(GenericViewSet):
+    queryset = Equipment.objects.all()
+    serializer_class = EquipmentSerializer
+    permission_classes = (IsAuthenticated,)
 
-    permission_classes = (IsAdminUser,)
-
-    def post(self, request, version, format=None):
+    @ action(methods=['post'], detail=False, url_path='create', permission_classes=[IsAdminUser])
+    def create_equipment(self, request, version, format=None):
         '''
         Create a new Equipment through post.
         Example:
@@ -91,15 +92,8 @@ class EquipmentCreate(APIView):
         response_dict['message'] = serializer.errors
         return Response(response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-
-class EquipmentList(APIView):
-    '''
-    Show all equipments.
-    '''
-
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, version, format=None):
+    @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAuthenticated])
+    def get_list(self, request, version, format=None):
         '''
         Show all equipments through get.
         Example:
@@ -108,46 +102,34 @@ class EquipmentList(APIView):
             All equipments's infomation.
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        equipments = Equipment.objects.all()
+        equipments = self.get_queryset()
 
         # paginate
         page = RecordPagination()
         page_list = page.paginate_queryset(
             equipments, request, view=self)
-        serializer = EquipmentSerializer(page_list, many=True)
+        serializer = self.get_serializer(page_list, many=True)
 
         response_dict['code'] = 200
         response_dict['message'] = 'Success'
         response_dict['current_page'] = page.page.number
         response_dict['num_pages'] = page.page.paginator.num_pages
-        response_dict['page_size'] = page.page_size
+        response_dict['per_page'] = page.page.paginator.per_page
+        response_dict['total_size'] = len(equipments)
         response_dict['data'] = serializer.data
-
         return Response(response_dict)
 
-
-class EquipmentDetail(APIView):
-    '''
-    Get or update  equipment's information through equipment's id.
-    '''
-
-    permission_classes = (IsAuthenticated,)
-
-    def get_object(self, pk):
-        try:
-            return Equipment.objects.get(pk=pk)
-        except Equipment.DoesNotExist:
-            return None
-
+    @ action(methods=['get'], detail=True, url_path='info', permission_classes=[IsAuthenticated])
     def get(self, request, version, pk, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        equipment = self.get_object(pk)
+        equipment = self.get_object()
         serializer = EquipmentSerializer(equipment)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(response_dict)
 
-    def put(self, request, version, pk, *args, **kwargs):
+    @ action(methods=['put'], detail=True, url_path='modifyinfo', permission_classes=[IsAuthenticated])
+    def put(self, request, version, pk, format=None):
         '''
         Update equpment's infomation.
         Example:
@@ -176,11 +158,14 @@ class EquipmentDetail(APIView):
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        equipment = self.get_object(pk)
-
+        equipment = self.get_object()
+        serializer = self.get_serializer(equipment)
         # Superuser or this equipment's owner can change every info except id of this equipment.
         if request.user.is_superuser or equipment.owner == request.user:
-            serializer = EquipmentSerializer(equipment)
+            if self.get_queryset().filter(name=request.data['name']):
+                response_dict['code'] = 400
+                response_dict['message'] = 'Existing username'
+                return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
             serializer.update(equipment, request.data, modifier=request.user)
             response_dict['code'] = 201
             response_dict['message'] = 'Updated successfully'
@@ -189,7 +174,6 @@ class EquipmentDetail(APIView):
 
         # This equipment's user can change name_brief and descript of this equipment.
         elif request.user in equipment.users.all():
-            serializer = EquipmentSerializer(equipment)
             equipment_data = serializer.data
             equipment_data['name_brief'] = request.data['name_brief']
             equipment_data['descript'] = request.data['descript']

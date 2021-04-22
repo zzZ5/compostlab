@@ -63,9 +63,9 @@ class EquipmentSerializer(serializers.ModelSerializer):
         if _save_equipment_record('name_brief', instance.name_brief, name_brief, modifier, instance):
             instance.name_brief = name_brief
 
-        key = validated_data.get('key', instance.key)
-        if _save_equipment_record('key', instance.key, key, modifier, instance):
-            instance.key = key
+        # key = validated_data.get('key', instance.key)
+        # if _save_equipment_record('key', instance.key, key, modifier, instance):
+        #     instance.key = key
 
         type = validated_data.get('type', instance.type)
         if _save_equipment_record('type', instance.type, type, modifier, instance):
