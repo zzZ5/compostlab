@@ -1,15 +1,14 @@
 from account.serializers import BriefUserSerializer, UserSerializer
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, logout
+from django.contrib.auth.models import User
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
-from rest_framework.views import APIView
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
 
-class UserDetail(GenericViewSet):
+class UserViewSet(GenericViewSet):
     queryset = User.objects.all()
     serializer_class = BriefUserSerializer
     permission_classes = (IsAuthenticated,)
@@ -59,16 +58,18 @@ class UserDetail(GenericViewSet):
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
-    @ action(methods=['put'], detail=False)
+    @ action(methods=['put'], detail=False, url_path='modifyinfo')
     def put(self, request, version, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         serializer = self.get_serializer(instance=request.user)
-        if User.objects.filter(username=request.data['username']):
+        if self.get_queryset().filter(username=request.data['username']):
             response_dict['code'] = 400
             response_dict['message'] = 'Existing username'
-            return Response(data=response_dict, status=status.status.HTTP_400_BAD_REQUEST)
+            return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
         serializer.update(request.user, request.data)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        response_dict['message'] = 'Changed successfully'
+        response_dict['data'] = serializer.data
+        return Response(response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=False, url_path='logout')
     def log_out(self, request, version, format=None):
