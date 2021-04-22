@@ -3,7 +3,6 @@ from equipment import views
 from rest_framework.routers import SimpleRouter
 
 urlpatterns = [
-    path('historicalRecord/<pk>/', views.EquipmentHistoricalRecordView.as_view()),
 ]
 
 router = SimpleRouter()

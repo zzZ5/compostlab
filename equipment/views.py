@@ -188,20 +188,8 @@ class EquipmentViewSet(GenericViewSet):
         response_dict['message'] = 'No permissions'
         return Response(response_dict, status=status.status.HTTP_400_BAD_REQUEST)
 
-
-class EquipmentHistoricalRecordView(APIView):
-    '''
-    Show all HistoricalRecord of this equipment. 
-    '''
-    permission_classes = (IsAuthenticated,)
-
-    def _get_equipment_object(self, pk):
-        try:
-            return Equipment.objects.get(pk=pk)
-        except Equipment.DoesNotExist:
-            return None
-
-    def get(self, request, version, pk, format=None):
+    @ action(methods=['get'], detail=True, url_path='historicalRecord', permission_classes=[IsAuthenticated])
+    def get_historicalRecord(self, request, version, pk, format=None):
         '''
         Show equipment's all HistoricalRecord through get.
         Example:
@@ -211,7 +199,7 @@ class EquipmentHistoricalRecordView(APIView):
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        equipment = self._get_equipment_object(pk)
+        equipment = self.get_object()
         equipmentHistoricalRecords = equipment.equipmenthistoricalrecord_set.all()
 
         page = RecordPagination()
@@ -222,7 +210,8 @@ class EquipmentHistoricalRecordView(APIView):
         response_dict['code'] = 200
         response_dict['message'] = 'Success'
         response_dict['current_page'] = page.page.number
-        response_dict['page_size'] = page.page_size
         response_dict['num_pages'] = page.page.paginator.num_pages
+        response_dict['per_page'] = page.page.paginator.per_page
+        response_dict['total_size'] = len(equipmentHistoricalRecords)
         response_dict['data'] = serializer.data
         return Response(response_dict)
