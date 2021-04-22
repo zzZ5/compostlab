@@ -5,12 +5,11 @@ import time
 from equipment.models import Equipment
 from equipment.serializers import EquipmentSerializer, EquipmentHistoricalRecordSerializer
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.decorators import action
 
 
 def _get_random_secret_key(length=15, allowed_chars=None, secret_key=None):
@@ -149,9 +148,7 @@ class EquipmentViewSet(GenericViewSet):
                     }
                 ],
                 "owner": {
-                    "id": 4,
-                    "username": "test1",
-                    "email": "test1@example.com"
+                    "id": 4
                 }
         Return:
             All equipments's infomation.
@@ -193,7 +190,7 @@ class EquipmentViewSet(GenericViewSet):
         '''
         Show equipment's all HistoricalRecord through get.
         Example:
-            GET 127.0.0.1:8000/api/1.0/equipment/historicalRecord/4/?page=1&size=3
+            GET 127.0.0.1:8000/api/1.0/equipment/4/historicalRecord/?page=1&size=3
         Return:
             All records of this equipments..
         '''
