@@ -1,11 +1,26 @@
 from account.serializers import BriefUserSerializer, UserSerializer
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.models import User
+from account.serializers import UserRecordSerializer
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+
+
+class RecordPagination(PageNumberPagination):
+    """
+    Generate a custom definition pagination.
+    """
+
+    page_size = 10
+    # url/?page=1&size=5
+    page_query_param = 'page'
+    page_size_query_param = 'size'
+
+    max_page_size = 100
 
 
 class UserViewSet(GenericViewSet):
@@ -105,3 +120,30 @@ class UserViewSet(GenericViewSet):
         response_dict['message'] = 'Success!'
         response_dict['data'] = serializer.data
         return Response(response_dict, status=status.HTTP_200_OK)
+
+    @ action(methods=['get'], detail=True, url_path='record')
+    def get_record(self, request, version, pk, format=None):
+        '''
+        Show user's all record through get.
+        Example:
+            GET 127.0.0.1:8000/api/1.0/account/ 4/record/?page=1&size=3
+        Return:
+            All records of this user
+        '''
+
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        user = self.get_object()
+        userRecords = user.userrecord_set.all()
+        page = RecordPagination()
+        page_list = page.paginate_queryset(
+            userRecords, request, view=self)
+        serializer = UserRecordSerializer(page_list, many=True)
+
+        response_dict['code'] = 200
+        response_dict['message'] = 'Success'
+        response_dict['current_page'] = page.page.number
+        response_dict['num_pages'] = page.page.paginator.num_pages
+        response_dict['per_page'] = page.page.paginator.per_page
+        response_dict['total_size'] = len(userRecords)
+        response_dict['data'] = serializer.data
+        return Response(response_dict)
