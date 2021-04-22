@@ -1,10 +1,11 @@
 from django.urls import path
-
 from equipment import views
+from rest_framework.routers import SimpleRouter
 
 urlpatterns = [
-    path('list/', views.EquipmentList.as_view()),
-    path('create/', views.EquipmentCreate.as_view()),
     path('historicalRecord/<pk>/', views.EquipmentHistoricalRecordView.as_view()),
-    path('<pk>/', views.EquipmentDetail.as_view()),
 ]
+
+router = SimpleRouter()
+router.register(prefix='', viewset=views.EquipmentViewSet)
+urlpatterns += router.urls
