@@ -1,5 +1,5 @@
 from django.contrib import admin
-from equipment.models import Equipment, EquipmentHistoricalRecord
+from equipment.models import Equipment, EquipmentModifyRecord
 
 
 class EquipmentAdmin(admin.ModelAdmin):
@@ -17,7 +17,7 @@ class EquipmentAdmin(admin.ModelAdmin):
     readonly_fields = ['created_time', 'key']
 
 
-class EquipmentHistoryRecordAdmin(admin.ModelAdmin):
+class EquipmentModifyRecordAdmin(admin.ModelAdmin):
     list_display = ('equipment',  'record', 'modifier', 'created_time')
     list_filter = ['equipment', 'modifier', 'created_time']
     fieldsets = [
@@ -29,4 +29,4 @@ class EquipmentHistoryRecordAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Equipment, EquipmentAdmin)
-admin.site.register(EquipmentHistoricalRecord, EquipmentHistoryRecordAdmin)
+admin.site.register(EquipmentModifyRecord, EquipmentModifyRecordAdmin)

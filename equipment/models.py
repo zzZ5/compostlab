@@ -1,4 +1,3 @@
-from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -60,7 +59,7 @@ class EquipmentUsageRecord(models.Model):
         verbose_name_plural = "EquipmentUsageRecords"
 
 
-class EquipmentHistoricalRecord(models.Model):
+class EquipmentModifyRecord(models.Model):
 
     modifier = models.ForeignKey(
         User, null=True, on_delete=models.DO_NOTHING)
@@ -74,8 +73,8 @@ class EquipmentHistoricalRecord(models.Model):
 
     class Meta:
         ordering = ["-created_time"]
-        verbose_name = "EquipmentHistoricalRecord"
-        verbose_name_plural = "EquipmentHistoricalRecords"
+        verbose_name = "EquipmentModifyRecord"
+        verbose_name_plural = "EquipmentModifyRecords"
 
 
 class Sensor(models.Model):
@@ -96,7 +95,7 @@ class Sensor(models.Model):
         verbose_name_plural = "Sensors"
 
 
-class SensorHistoricalRecord(models.Model):
+class SensorRecord(models.Model):
 
     modifier = models.ForeignKey(
         User, null=True, on_delete=models.DO_NOTHING)
@@ -109,5 +108,11 @@ class SensorHistoricalRecord(models.Model):
 
     class Meta:
         ordering = ["-created_time"]
-        verbose_name = "SensorHistoricalRecord"
-        verbose_name_plural = "SensorHistoricalRecords"
+        verbose_name = "SensorRecord"
+        verbose_name_plural = "SensorRecords"
+
+
+# class data(models.Model):
+#     Sensor = models.ForeignKey(
+#         Sensor, null=True, on_delete=models.CASCADE)
+#     value = models.FloatField()

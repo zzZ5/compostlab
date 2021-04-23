@@ -3,7 +3,7 @@ import random
 import time
 
 from equipment.models import Equipment
-from equipment.serializers import EquipmentSerializer, EquipmentHistoricalRecordSerializer
+from equipment.serializers import EquipmentSerializer, EquipmentModifyRecordSerializer
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -185,30 +185,30 @@ class EquipmentViewSet(GenericViewSet):
         response_dict['message'] = 'No permissions'
         return Response(response_dict, status=status.status.HTTP_400_BAD_REQUEST)
 
-    @ action(methods=['get'], detail=True, url_path='historicalRecord', permission_classes=[IsAuthenticated])
-    def get_historicalRecord(self, request, version, pk, format=None):
+    @ action(methods=['get'], detail=True, url_path='modifyRecord', permission_classes=[IsAuthenticated])
+    def get_modifyRecord(self, request, version, pk, format=None):
         '''
-        Show equipment's all HistoricalRecord through get.
+        Show equipment's all ModifyRecord through get.
         Example:
-            GET 127.0.0.1:8000/api/1.0/equipment/4/historicalRecord/?page=1&size=3
+            GET 127.0.0.1:8000/api/1.0/equipment/4/modifyRecord/?page=1&size=3
         Return:
             All records of this equipments..
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         equipment = self.get_object()
-        equipmentHistoricalRecords = equipment.equipmenthistoricalrecord_set.all()
+        equipmentModifyRecords = equipment.equipmentmodifyrecord_set.all()
 
         page = RecordPagination()
         page_list = page.paginate_queryset(
-            equipmentHistoricalRecords, request, view=self)
-        serializer = EquipmentHistoricalRecordSerializer(page_list, many=True)
+            equipmentModifyRecords, request, view=self)
+        serializer = EquipmentModifyRecordSerializer(page_list, many=True)
 
         response_dict['code'] = 200
         response_dict['message'] = 'Success'
         response_dict['current_page'] = page.page.number
         response_dict['num_pages'] = page.page.paginator.num_pages
         response_dict['per_page'] = page.page.paginator.per_page
-        response_dict['total_size'] = len(equipmentHistoricalRecords)
+        response_dict['total_size'] = len(equipmentModifyRecords)
         response_dict['data'] = serializer.data
         return Response(response_dict)

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from account.serializers import BriefUserSerializer
 from django.contrib.auth.models import User
-from equipment.models import Equipment, EquipmentUsageRecord, EquipmentHistoricalRecord, Sensor, SensorHistoricalRecord
+from equipment.models import Equipment, EquipmentUsageRecord, EquipmentModifyRecord, Sensor, SensorRecord
 
 
 def _get_user(id='', username='', email='', *args, **kwargs):
@@ -23,7 +23,7 @@ def _save_equipment_record(name, old, new, modifier, equipment):
     if old != new:
         record = 'Changed the "{}" from "{}" to "{}"'.format(
             name, old, new)
-        EquipmentHistoricalRecord.objects.create(
+        EquipmentModifyRecord.objects.create(
             modifier=modifier, equipment=equipment, record=record)
         return True
     else:
@@ -97,12 +97,12 @@ class EquipmentUsageRecordSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-class EquipmentHistoricalRecordSerializer(serializers.ModelSerializer):
+class EquipmentModifyRecordSerializer(serializers.ModelSerializer):
     modifier = BriefUserSerializer(required=False)
     # equipment = EquipmentSerializer(required=False)
 
     class Meta:
-        model = EquipmentHistoricalRecord
+        model = EquipmentModifyRecord
         fields = ('record', 'modifier', 'created_time')
         depth = 1
 
@@ -117,13 +117,13 @@ class SensorSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-class SensorHistoricalRecordSerializer(serializers.ModelSerializer):
+class SensorRecordSerializer(serializers.ModelSerializer):
     modifier = BriefUserSerializer(required=False)
     sensor = SensorSerializer(required=False)
     equipment = EquipmentSerializer(required=False)
 
     class Meta:
-        model = SensorHistoricalRecord
+        model = SensorRecord
         fields = ('id', 'name', 'name_brief', 'key',
                   'type', 'descript', 'equipment', 'sensor', 'modifier')
         depth = 1
