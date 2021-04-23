@@ -2,8 +2,8 @@ import hashlib
 import random
 import time
 
-from equipment.models import Equipment
-from equipment.serializers import EquipmentSerializer, EquipmentModifyRecordSerializer
+from equipment.models import Equipment, Sensor
+from equipment.serializers import EquipmentSerializer, EquipmentModifyRecordSerializer, SensorSerializer
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -91,6 +91,15 @@ class EquipmentViewSet(GenericViewSet):
         response_dict['message'] = serializer.errors
         return Response(response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
+    @ action(methods=['get'], detail=True, url_path='info', permission_classes=[IsAuthenticated])
+    def get(self, request, version, pk, format=None):
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        equipment = self.get_object()
+        serializer = EquipmentSerializer(equipment)
+        response_dict['message'] = 'Success'
+        response_dict['data'] = serializer.data
+        return Response(response_dict)
+
     @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAuthenticated])
     def get_list(self, request, version, format=None):
         '''
@@ -118,11 +127,49 @@ class EquipmentViewSet(GenericViewSet):
         response_dict['data'] = serializer.data
         return Response(response_dict)
 
-    @ action(methods=['get'], detail=True, url_path='info', permission_classes=[IsAuthenticated])
-    def get(self, request, version, pk, format=None):
+    @ action(methods=['get'], detail=True, url_path='modifyRecord', permission_classes=[IsAuthenticated])
+    def get_modifyRecord(self, request, version, pk, format=None):
+        '''
+        Show equipment's all ModifyRecord through get.
+        Example:
+            GET 127.0.0.1:8000/api/1.0/equipment/4/modifyRecord/?page=1&size=3
+        Return:
+            All records of this equipments..
+        '''
+
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         equipment = self.get_object()
-        serializer = EquipmentSerializer(equipment)
+        equipmentModifyRecords = equipment.equipmentmodifyrecord_set.all()
+
+        page = RecordPagination()
+        page_list = page.paginate_queryset(
+            equipmentModifyRecords, request, view=self)
+        serializer = EquipmentModifyRecordSerializer(page_list, many=True)
+
+        response_dict['code'] = 200
+        response_dict['message'] = 'Success'
+        response_dict['current_page'] = page.page.number
+        response_dict['num_pages'] = page.page.paginator.num_pages
+        response_dict['per_page'] = page.page.paginator.per_page
+        response_dict['total_size'] = len(equipmentModifyRecords)
+        response_dict['data'] = serializer.data
+        return Response(response_dict)
+
+    @ action(methods=['get'], detail=True, url_path='sensor', permission_classes=[IsAuthenticated])
+    def get_sensor(self, request, version, pk, format=None):
+        '''
+        Show equipment's all ModifyRecord through get.
+        Example:
+            GET 127.0.0.1:8000/api/1.0/equipment/4/modifyRecord/?page=1&size=3
+        Return:
+            All records of this equipments..
+        '''
+
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        equipment = self.get_object()
+        sensors = equipment.sensor_set.all()
+        serializer = SensorSerializer(sensors, many=True)
+        response_dict['code'] = 200
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(response_dict)
@@ -184,31 +231,3 @@ class EquipmentViewSet(GenericViewSet):
         response_dict['code'] = 400
         response_dict['message'] = 'No permissions'
         return Response(response_dict, status=status.status.HTTP_400_BAD_REQUEST)
-
-    @ action(methods=['get'], detail=True, url_path='modifyRecord', permission_classes=[IsAuthenticated])
-    def get_modifyRecord(self, request, version, pk, format=None):
-        '''
-        Show equipment's all ModifyRecord through get.
-        Example:
-            GET 127.0.0.1:8000/api/1.0/equipment/4/modifyRecord/?page=1&size=3
-        Return:
-            All records of this equipments..
-        '''
-
-        response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        equipment = self.get_object()
-        equipmentModifyRecords = equipment.equipmentmodifyrecord_set.all()
-
-        page = RecordPagination()
-        page_list = page.paginate_queryset(
-            equipmentModifyRecords, request, view=self)
-        serializer = EquipmentModifyRecordSerializer(page_list, many=True)
-
-        response_dict['code'] = 200
-        response_dict['message'] = 'Success'
-        response_dict['current_page'] = page.page.number
-        response_dict['num_pages'] = page.page.paginator.num_pages
-        response_dict['per_page'] = page.page.paginator.per_page
-        response_dict['total_size'] = len(equipmentModifyRecords)
-        response_dict['data'] = serializer.data
-        return Response(response_dict)
