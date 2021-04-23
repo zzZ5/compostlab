@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from account.serializers import BriefUserSerializer
 from django.contrib.auth.models import User
-from equipment.models import Equipment, EquipmentUsageRecord, EquipmentModifyRecord, Sensor, SensorRecord
+from equipment.models import Equipment, EquipmentRecordUsage, EquipmentRecordModify
 
 
 def _get_user(id='', username='', email='', *args, **kwargs):
@@ -23,7 +23,7 @@ def _save_equipment_record(name, old, new, modifier, equipment):
     if old != new:
         record = 'Changed the "{}" from "{}" to "{}"'.format(
             name, old, new)
-        EquipmentModifyRecord.objects.create(
+        EquipmentRecordModify.objects.create(
             modifier=modifier, equipment=equipment, record=record)
         return True
     else:
@@ -92,8 +92,8 @@ class EquipmentUsageRecordSerializer(serializers.ModelSerializer):
     equipment = EquipmentSerializer(required=False)
 
     class Meta:
-        model = EquipmentUsageRecord
-        fields = ('id', 'begin_time', 'end_time', 'user', 'equpment')
+        model = EquipmentRecordUsage
+        fields = ('begin_time', 'end_time', 'user', 'equpment')
         depth = 1
 
 
@@ -102,28 +102,6 @@ class EquipmentModifyRecordSerializer(serializers.ModelSerializer):
     # equipment = EquipmentSerializer(required=False)
 
     class Meta:
-        model = EquipmentModifyRecord
+        model = EquipmentRecordModify
         fields = ('record', 'modifier', 'created_time')
-        depth = 1
-
-
-class SensorSerializer(serializers.ModelSerializer):
-    equipment = EquipmentSerializer(required=False)
-
-    class Meta:
-        model = Sensor
-        fields = ('id', 'name', 'name_brief', 'key',
-                  'type', 'descript', 'equipment')
-        depth = 1
-
-
-class SensorRecordSerializer(serializers.ModelSerializer):
-    modifier = BriefUserSerializer(required=False)
-    sensor = SensorSerializer(required=False)
-    equipment = EquipmentSerializer(required=False)
-
-    class Meta:
-        model = SensorRecord
-        fields = ('id', 'name', 'name_brief', 'key',
-                  'type', 'descript', 'equipment', 'sensor', 'modifier')
         depth = 1

@@ -77,7 +77,7 @@ class UserViewSet(GenericViewSet):
     def put(self, request, version, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         serializer = self.get_serializer(instance=request.user)
-        if self.get_queryset().filter(username=request.data['username']):
+        if request.data['username'] != request.user.username and self.get_queryset().filter(username=request.data['username']):
             response_dict['code'] = 400
             response_dict['message'] = 'Existing username'
             return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
@@ -102,22 +102,18 @@ class UserViewSet(GenericViewSet):
         Change user's password.
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        try:
-            user = authenticate(
-                username=request.user.username, password=request.data['password'])
-            if request.user != user:
-                response_dict['code'] = 400
-                response_dict['message'] = 'Inconsistent users'
-                return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
-            user.set_password(request.data['new_password'])
-            user.save()
-        except:
+
+        user = authenticate(
+            username=request.user.username, password=request.data['password'])
+        if request.user != user:
             response_dict['code'] = 400
             response_dict['message'] = 'Password error'
             return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(request.data['new_password'])
+        user.save()
 
         serializer = self.get_serializer(instance=user)
-        response_dict['message'] = 'Success!'
+        response_dict['message'] = 'Success, please log in again'
         response_dict['data'] = serializer.data
         return Response(response_dict, status=status.HTTP_200_OK)
 

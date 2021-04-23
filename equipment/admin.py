@@ -1,5 +1,5 @@
 from django.contrib import admin
-from equipment.models import Equipment, EquipmentModifyRecord
+from equipment.models import Equipment, EquipmentRecordModify
 
 
 class EquipmentAdmin(admin.ModelAdmin):
@@ -29,4 +29,4 @@ class EquipmentModifyRecordAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Equipment, EquipmentAdmin)
-admin.site.register(EquipmentModifyRecord, EquipmentModifyRecordAdmin)
+admin.site.register(EquipmentRecordModify, EquipmentModifyRecordAdmin)

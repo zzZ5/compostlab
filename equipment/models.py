@@ -20,7 +20,7 @@ class Equipment(models.Model):
     begin_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
     owner = models.ForeignKey(
-        User, null=True, blank=True, on_delete=models.DO_NOTHING, related_name='%(class)s_created')
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name='%(class)s_created')
     users = models.ManyToManyField(
         User, blank=True,  related_name='%(class)s_inuse')
 
@@ -36,12 +36,13 @@ class Equipment(models.Model):
         return self.name
 
     class Meta:
+        db_table = "equipment"
         ordering = ["-created_time"]
         verbose_name = "Equipment"
         verbose_name_plural = "Equipments"
 
 
-class EquipmentUsageRecord(models.Model):
+class EquipmentRecordUsage(models.Model):
 
     users = models.ManyToManyField(
         User, related_name='%(class)s_used')
@@ -54,15 +55,16 @@ class EquipmentUsageRecord(models.Model):
         return self.end_time
 
     class Meta:
+        db_table = "equipment_record_usage"
         ordering = ["-created_time"]
         verbose_name = "EquipmentUsageRecord"
         verbose_name_plural = "EquipmentUsageRecords"
 
 
-class EquipmentModifyRecord(models.Model):
+class EquipmentRecordModify(models.Model):
 
     modifier = models.ForeignKey(
-        User, null=True, on_delete=models.DO_NOTHING)
+        User, null=True, on_delete=models.SET_NULL)
     equipment = models.ForeignKey(
         Equipment, null=True, on_delete=models.CASCADE)
     record = models.CharField(max_length=256, blank=True)
@@ -72,47 +74,7 @@ class EquipmentModifyRecord(models.Model):
         return self.record
 
     class Meta:
+        db_table = "equipment_record_modify"
         ordering = ["-created_time"]
         verbose_name = "EquipmentModifyRecord"
         verbose_name_plural = "EquipmentModifyRecords"
-
-
-class Sensor(models.Model):
-    name = models.CharField(max_length=128, unique=True)
-    name_brief = models.CharField(max_length=64, unique=True, null=True)
-    key = models.CharField(max_length=16, unique=True, null=True)
-    descript = models.CharField(max_length=256, null=True)
-    equipment = models.ForeignKey(
-        Equipment, null=True, on_delete=models.DO_NOTHING)
-    created_time = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        ordering = ["-created_time"]
-        verbose_name = "Sensor"
-        verbose_name_plural = "Sensors"
-
-
-class SensorRecord(models.Model):
-
-    modifier = models.ForeignKey(
-        User, null=True, on_delete=models.DO_NOTHING)
-    sensor = models.ForeignKey(Sensor, null=True, on_delete=models.CASCADE)
-    record = models.CharField(max_length=256, blank=True)
-    created_time = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.record
-
-    class Meta:
-        ordering = ["-created_time"]
-        verbose_name = "SensorRecord"
-        verbose_name_plural = "SensorRecords"
-
-
-# class data(models.Model):
-#     Sensor = models.ForeignKey(
-#         Sensor, null=True, on_delete=models.CASCADE)
-#     value = models.FloatField()

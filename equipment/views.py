@@ -2,8 +2,10 @@ import hashlib
 import random
 import time
 
-from equipment.models import Equipment, Sensor
-from equipment.serializers import EquipmentSerializer, EquipmentModifyRecordSerializer, SensorSerializer
+from equipment.models import Equipment
+from data.models import Sensor
+from data.serializers import SensorSerializer
+from equipment.serializers import EquipmentSerializer, EquipmentModifyRecordSerializer
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -128,7 +130,7 @@ class EquipmentViewSet(GenericViewSet):
         return Response(response_dict)
 
     @ action(methods=['get'], detail=True, url_path='modifyRecord', permission_classes=[IsAuthenticated])
-    def get_modifyRecord(self, request, version, pk, format=None):
+    def get_record_modify(self, request, version, pk, format=None):
         '''
         Show equipment's all ModifyRecord through get.
         Example:
@@ -139,7 +141,7 @@ class EquipmentViewSet(GenericViewSet):
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         equipment = self.get_object()
-        equipmentModifyRecords = equipment.equipmentmodifyrecord_set.all()
+        equipmentModifyRecords = equipment.equipmentrecordmodify_set.all()
 
         page = RecordPagination()
         page_list = page.paginate_queryset(
@@ -206,7 +208,7 @@ class EquipmentViewSet(GenericViewSet):
         serializer = self.get_serializer(equipment)
         # Superuser or this equipment's owner can change every info except id of this equipment.
         if request.user.is_superuser or equipment.owner == request.user:
-            if self.get_queryset().filter(name=request.data['name']):
+            if equipment.name != request.data['name'] and self.get_queryset().filter(name=request.data['name']):
                 response_dict['code'] = 400
                 response_dict['message'] = 'Existing username'
                 return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)

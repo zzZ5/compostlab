@@ -13,6 +13,7 @@ class UserRecord(models.Model):
         return self.record
 
     class Meta:
+        db_table = "user_record"
         ordering = ["-created_time"]
         verbose_name = "UserRecord"
         verbose_name_plural = "UserRecords"
