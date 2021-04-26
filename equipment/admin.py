@@ -4,12 +4,13 @@ from equipment.models import Equipment, EquipmentRecordModify
 
 class EquipmentAdmin(admin.ModelAdmin):
     list_display = ('name', 'name_brief', 'pk', 'key',
-                    'type', 'descript', 'begin_time',
+                    'type', 'descript', 'sensors_display', 'begin_time',
                     'end_time', 'created_time', 'owner', 'users_display', 'is_inuse')
     list_filter = ['owner', 'created_time']
     fieldsets = [
         ('equipment name', {'fields': ['name', 'name_brief']}),
-        ('equipment information', {'fields': ['type', 'descript', 'key']}),
+        ('equipment information', {'fields': [
+         'type', 'descript', 'key', 'sensors']}),
         ('usage information', {'fields': ['begin_time', 'end_time', 'users']}),
         ('owner', {'fields': ['owner']}),
         ('created_time', {'fields': ['created_time']}),

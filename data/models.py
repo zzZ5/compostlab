@@ -21,7 +21,7 @@ class Sensor(models.Model):
     descript = models.CharField(max_length=256, null=True)
 
     equipment = models.ForeignKey(
-        Equipment, null=True, on_delete=models.SET_NULL)
+        Equipment, null=True, on_delete=models.SET_NULL, related_name='%(class)s')
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -56,7 +56,7 @@ class data(models.Model):
     sensor = models.ForeignKey(
         Sensor, null=True, on_delete=models.CASCADE)
     value = models.FloatField()
-    unit = models.CharField(max_length=32, null=True)
+    unit = models.CharField(max_length=32, null=True, blank=True)
     measured_time = models.DateTimeField(null=True)
     created_time = models.DateTimeField(auto_now_add=True)
 

@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 
-def _get_random_secret_key(length=15, allowed_chars=None, secret_key=None):
+def get_random_secret_key(length=15, allowed_chars=None, secret_key=None):
     '''
     Generate random string.
 
@@ -74,9 +74,9 @@ class EquipmentViewSet(GenericViewSet):
         '''
 
         # Every equipment have a unique key.
-        key = _get_random_secret_key()
+        key = get_random_secret_key()
         while Equipment.objects.filter(key=key):
-            key = _get_random_secret_key()
+            key = get_random_secret_key()
 
         serializer = EquipmentSerializer(data=request.data)
 

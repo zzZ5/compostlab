@@ -22,5 +22,5 @@ urlpatterns = [
     path('api/<version>/login/', obtain_jwt_token),
     path('api/<version>/account/', include('account.urls')),
     path('api/<version>/equipment/', include('equipment.urls')),
-    path('api/<version>/', include('equipment.urls')),
+    path('api/<version>/', include('data.urls')),
 ]

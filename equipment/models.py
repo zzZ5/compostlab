@@ -27,6 +27,9 @@ class Equipment(models.Model):
     def users_display(self):
         return "\n".join([user.username for user in self.users.all()])
 
+    def sensors_display(self):
+        return "\n".join([sensor.name for sensor in self.sensors.all()])
+
     def is_inuse(self):
         if self.end_time:
             return self.end_time >= timezone.now()

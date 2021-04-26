@@ -22,3 +22,12 @@ class SensorRecordSerializer(serializers.ModelSerializer):
         model = Sensor_Record
         fields = ('record', 'sensor', 'modifier', 'created_time')
         depth = 1
+
+
+class DataSerializer(serializers.ModelSerializer):
+    sensor = SensorSerializer(required=False)
+
+    class Meta:
+        model = Sensor_Record
+        fields = ('sensor', 'value', 'unit', 'measured_time', 'created_time')
+        depth = 1

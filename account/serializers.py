@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from account.models import UserRecord
 
 
-def _save_user_record(name, old, new, user):
+def save_user_record(name, old, new, user):
     if old != new:
         record = 'Changed the "{}" from "{}" to "{}"'.format(
             name, old, new)
@@ -35,11 +35,11 @@ class BriefUserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
 
         username = validated_data.get('username', instance.username)
-        if _save_user_record('username', instance.username, username, instance):
+        if save_user_record('username', instance.username, username, instance):
             instance.username = username
 
         email = validated_data.get('email', instance.email)
-        if _save_user_record('email', instance.email, email, instance):
+        if save_user_record('email', instance.email, email, instance):
             instance.email = email
 
         instance.save()
