@@ -1,12 +1,9 @@
 from rest_framework import serializers
 from account.serializers import BriefUserSerializer
 from data.models import Sensor, Sensor_Record
-from equipment.serializers import EquipmentSerializer
 
 
 class SensorSerializer(serializers.ModelSerializer):
-    equipment = EquipmentSerializer(required=False)
-
     class Meta:
         model = Sensor
         fields = ('id', 'name', 'name_brief', 'key',
