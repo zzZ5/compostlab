@@ -1,10 +1,10 @@
 from django.urls import path
-from equipment import views
+from equipment.views import EquipmentViewSet
 from rest_framework.routers import SimpleRouter
 
 urlpatterns = [
 ]
 
 router = SimpleRouter()
-router.register(prefix='', viewset=views.EquipmentViewSet)
+router.register(prefix='', viewset=EquipmentViewSet)
 urlpatterns += router.urls
