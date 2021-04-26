@@ -2,7 +2,7 @@ import hashlib
 import random
 import time
 
-from data.models import Sensor, data
+from data.models import Sensor, Data
 from data.serializers import DataSerializer, SensorSerializer
 from rest_framework import status
 from rest_framework.decorators import action
