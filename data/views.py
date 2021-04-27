@@ -106,7 +106,7 @@ class SensorViewSet(GenericViewSet):
         while Sensor.objects.filter(key=key):
             key = get_random_secret_key()
 
-        serializer = SensorSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         if serializer.is_valid():
@@ -127,5 +127,33 @@ class SensorViewSet(GenericViewSet):
         sensor = self.get_object()
         serializer = self.get_serializer(sensor)
         response_dict['message'] = 'Success'
+        response_dict['data'] = serializer.data
+        return Response(response_dict)
+
+    @ action(methods=['put'], detail=True, url_path='modifyinfo', permission_classes=[IsAdminUser])
+    def put(self, request, version, pk, format=None):
+        '''
+        Update sensor's infomation.
+        Example:
+                "name": "test1",
+                "name_brief": "t123",
+                "type": "RE",
+                "descript": "test1",
+                "equipment": "{"id": "4"}"
+        Return:
+            All sensor's infomation.
+        '''
+
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        sensor = self.get_object()
+        serializer = self.get_serializer(sensor)
+
+        if sensor.name != request.data['name'] and self.get_queryset().filter(name=request.data['name']):
+            response_dict['code'] = 400
+            response_dict['message'] = 'Existing name'
+            return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
+        serializer.update(sensor, request.data, modifier=request.user)
+        response_dict['code'] = 201
+        response_dict['message'] = 'Updated successfully'
         response_dict['data'] = serializer.data
         return Response(response_dict)
