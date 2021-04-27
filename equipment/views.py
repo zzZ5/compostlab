@@ -157,7 +157,7 @@ class EquipmentViewSet(GenericViewSet):
 
         if equipment.name != request.data['name'] and self.get_queryset().filter(name=request.data['name']):
             response_dict['code'] = 400
-            response_dict['message'] = 'Existing username'
+            response_dict['message'] = 'Existing name'
             return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
         serializer.update(equipment, request.data, modifier=request.user)
         response_dict['code'] = 201
