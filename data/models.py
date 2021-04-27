@@ -1,6 +1,7 @@
+from equipment.models import Equipment
+
 from django.contrib.auth.models import User
 from django.db import models
-from equipment.models import Equipment
 
 
 class Sensor(models.Model):
@@ -34,12 +35,13 @@ class Sensor(models.Model):
         verbose_name_plural = "Sensors"
 
 
-class Sensor_Record(models.Model):
+class SensorRecord(models.Model):
 
+    record = models.CharField(max_length=256, blank=True)
+    sensor = models.ForeignKey(
+        Sensor, null=True, on_delete=models.CASCADE, related_name='%(class)s')
     modifier = models.ForeignKey(
         User, null=True, on_delete=models.SET_NULL)
-    sensor = models.ForeignKey(Sensor, null=True, on_delete=models.CASCADE)
-    record = models.CharField(max_length=256, blank=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -67,4 +69,4 @@ class Data(models.Model):
         db_table = "data"
         ordering = ["-created_time"]
         verbose_name = "Data"
-        verbose_name_plural = "Datas"
+        verbose_name_plural = "Data"

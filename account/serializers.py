@@ -1,6 +1,6 @@
-from rest_framework import serializers
-from django.contrib.auth.models import User
 from account.models import UserRecord
+from django.contrib.auth.models import User
+from rest_framework import serializers
 
 
 def save_user_record(name, old, new, user):
@@ -13,10 +13,10 @@ def save_user_record(name, old, new, user):
         return False
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password',
+        fields = ('id', 'username', 'email', 'password', 'is_active',
                   'is_staff', 'is_superuser', 'last_login', 'date_joined')
 
     def create(self, validated_data):
@@ -26,14 +26,13 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class BriefUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'is_staff',
-                  'is_superuser', 'last_login', 'date_joined')
+        fields = ('id', 'username', 'email', 'is_active',
+                  'is_staff', 'last_login', 'date_joined')
 
     def update(self, instance, validated_data):
-
         username = validated_data.get('username', instance.username)
         if save_user_record('username', instance.username, username, instance):
             instance.username = username
@@ -47,7 +46,7 @@ class BriefUserSerializer(serializers.ModelSerializer):
 
 
 class UserRecordSerializer(serializers.ModelSerializer):
-    user = BriefUserSerializer(required=False)
+    user = UserSerializer(required=False)
 
     class Meta:
         model = UserRecord

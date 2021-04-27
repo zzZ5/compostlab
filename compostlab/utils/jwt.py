@@ -1,5 +1,5 @@
 from django.contrib.auth import login
-from account.serializers import BriefUserSerializer
+from account.serializers import UserSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework_jwt.settings import api_settings
@@ -52,7 +52,7 @@ def jwt_response_payload_handler(token, user=None, request=None):
         "message": "success",
         "data":
         {
-            "user": BriefUserSerializer(user, context={"request": request}).data,
+            "user": UserSerializer(user, context={"request": request}).data,
         },
         "token": "JWT " + token
     }

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from data.models import Sensor
+from data.models import Sensor, SensorRecord
 
 
 class SensorAdmin(admin.ModelAdmin):
@@ -12,7 +12,19 @@ class SensorAdmin(admin.ModelAdmin):
          'type', 'descript', 'key', 'equipment']}),
         ('created_time', {'fields': ['created_time']}),
     ]
-    readonly_fields = ['created_time', 'key']
+    readonly_fields = ['created_time']
+
+
+class SensorRecordAdmin(admin.ModelAdmin):
+    list_display = ('sensor',  'record', 'modifier', 'created_time')
+    list_filter = ['sensor', 'modifier', 'created_time']
+    fieldsets = [
+        ('modify information', {'fields': ['sensor', 'record']}),
+        ('modifier', {'fields': ['modifier']}),
+        ('created_time', {'fields': ['created_time']}),
+    ]
+    readonly_fields = ['created_time']
 
 
 admin.site.register(Sensor, SensorAdmin)
+admin.site.register(SensorRecord, SensorRecordAdmin)

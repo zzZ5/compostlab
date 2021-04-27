@@ -1,31 +1,18 @@
-from account.serializers import BriefUserSerializer, UserSerializer
+from account.serializers import UserRecordSerializer, UserSerializer, UserDetailSerializer
+from compostlab.utils.pagination import RecordPagination
+
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.models import User
-from account.serializers import UserRecordSerializer
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 
-class RecordPagination(PageNumberPagination):
-    """
-    Generate a custom definition pagination.
-    """
-
-    page_size = 10
-    # url/?page=1&size=5
-    page_query_param = 'page'
-    page_size_query_param = 'size'
-
-    max_page_size = 100
-
-
 class UserViewSet(GenericViewSet):
     queryset = User.objects.all()
-    serializer_class = BriefUserSerializer
+    serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
 
     @ action(methods=['post'], detail=False, url_path='register', permission_classes=[IsAdminUser])
@@ -33,17 +20,18 @@ class UserViewSet(GenericViewSet):
         '''
         Create a new account through post.
         Example:
-            username:test1
-            email:test1@example.com
-            password:test123
-            is_staff:true
-            is_superuser:false
+            "username": "test1"
+            "email": "test1@example.com"
+            "password": "test123"
+            "is_active": "true"
+            "is_staff": "false"
+            "is_superuser": "false"
         Return:
             if success, return user's profile.
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        serializer = UserSerializer(data=request.data)
+        serializer = UserDetailSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -122,14 +110,14 @@ class UserViewSet(GenericViewSet):
         '''
         Show user's all record through get.
         Example:
-            GET 127.0.0.1:8000/api/1.0/account/ 4/record/?page=1&size=3
+            GET 127.0.0.1:8000/api/1.0/account/4/record/?page=1&size=3
         Return:
-            All records of this user
+            All records of this user.
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         user = self.get_object()
-        userRecords = user.userrecord_set.all()
+        userRecords = user.userrecord.all()
         page = RecordPagination()
         page_list = page.paginate_queryset(
             userRecords, request, view=self)

@@ -2,11 +2,12 @@ import hashlib
 import random
 import time
 
+from compostlab.utils.pagination import RecordPagination
 from data.models import Sensor, Data
 from data.serializers import DataSerializer, SensorSerializer
+
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -38,19 +39,6 @@ def get_random_secret_key(length=15, allowed_chars=None, secret_key=None):
         ).digest())
     ret = ''.join(random.choice(allowed_chars) for i in range(length))
     return ret
-
-
-class DataPagination(PageNumberPagination):
-    """
-    Generate a custom definition pagination.
-    """
-
-    page_size = 100
-    # url/?page=1&size=5
-    page_query_param = 'page'
-    page_size_query_param = 'size'
-
-    max_page_size = 1000
 
 
 class DataViewSet(GenericViewSet):
@@ -108,6 +96,7 @@ class SensorViewSet(GenericViewSet):
             "name_brief": "t1"
             "type": "T"
             "descript": "this is a test sensor."
+            "equipment": "{"id": "4"}"
         Return:
             if success, return sensor's information.
         '''

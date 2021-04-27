@@ -1,8 +1,9 @@
+from data.models import Sensor
+from equipment.models import Equipment, EquipmentRecord
+
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.forms import ModelMultipleChoiceField, ModelForm
-from equipment.models import Equipment, EquipmentRecordModify
-from data.models import Sensor
 
 
 class SensorAdminForm(ModelForm):
@@ -23,19 +24,15 @@ class SensorAdminForm(ModelForm):
 
 class EquipmentAdmin(admin.ModelAdmin):
     form = SensorAdminForm
-    list_display = ('name', 'name_brief', 'pk', 'key',
-                    'type', 'descript', 'sensors_display', 'begin_time',
-                    'end_time', 'created_time', 'owner', 'users_display', 'is_inuse')
-    list_filter = ['owner', 'created_time']
+    list_display = ('name', 'name_brief', 'pk', 'type',
+                    'descript', 'sensors_display', 'created_time')
+    list_filter = ['created_time']
     fieldsets = [
         ('equipment name', {'fields': ['name', 'name_brief']}),
         ('equipment information', {'fields': [
-         'type', 'descript', 'key', 'sensors']}),
-        ('usage information', {'fields': ['begin_time', 'end_time', 'users']}),
-        ('owner', {'fields': ['owner']}),
+         'type', 'descript', 'sensors']}),
         ('created_time', {'fields': ['created_time']}),
     ]
-    filter_horizontal = ('users',)
 
     def save_model(self, request, obj, form, change):
         original_sensors = obj.sensors.all()
@@ -48,10 +45,10 @@ class EquipmentAdmin(admin.ModelAdmin):
             obj.sensors.add(item)
         obj.save()
 
-    readonly_fields = ['created_time', 'key']
+    readonly_fields = ['created_time']
 
 
-class EquipmentModifyRecordAdmin(admin.ModelAdmin):
+class EquipmentRecordAdmin(admin.ModelAdmin):
     list_display = ('equipment',  'record', 'modifier', 'created_time')
     list_filter = ['equipment', 'modifier', 'created_time']
     fieldsets = [
@@ -63,4 +60,4 @@ class EquipmentModifyRecordAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Equipment, EquipmentAdmin)
-admin.site.register(EquipmentRecordModify, EquipmentModifyRecordAdmin)
+admin.site.register(EquipmentRecord, EquipmentRecordAdmin)
