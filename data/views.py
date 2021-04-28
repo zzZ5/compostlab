@@ -42,12 +42,9 @@ def get_random_secret_key(length=15, allowed_chars=None, secret_key=None):
 
 
 class DataViewSet(GenericViewSet):
-    queryset = Sensor.objects.all()
+    queryset = Data.objects.all()
     serializer_class = DataSerializer
     permission_classes = (IsAuthenticated,)
-
-    def get_sensor_by_key(key):
-        Sensor.objects.get(key=key)
 
     @ action(methods=['post'], detail=False, url_path='upload', permission_classes=[AllowAny])
     def upload_data(self, request, version, format=None):
@@ -62,21 +59,20 @@ class DataViewSet(GenericViewSet):
 
         # Every equipment have a unique key.
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        try:
-            sensor = self.get_sensor_by_key(request.data['key'])
-        except:
-            response_dict['code'] = 400
-            response_dict['message'] = 'Useless key'
-            return Response(response_dict, status=status.status.HTTP_400_BAD_REQUEST)
 
-        serializer = DataSerializer(data=request.data)
+        if "data" in request.data:
+            print(request.data)
+            serializer = DataSerializer(data=request.data['data'], many=True)
+        else:
+            serializer = DataSerializer(data=request.data)
 
         if serializer.is_valid():
             # Successfully created
-            serializer.save(sensor=sensor)
+            serializer.save()
             response_dict['code'] = 201
+            response_dict['message'] = "success"
+            response_dict['data'] = serializer.data
             return Response(response_dict, status=status.HTTP_201_CREATED)
-
         response_dict['code'] = 422
         response_dict['message'] = serializer.errors
         return Response(response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -127,6 +123,33 @@ class SensorViewSet(GenericViewSet):
         sensor = self.get_object()
         serializer = self.get_serializer(sensor)
         response_dict['message'] = 'Success'
+        response_dict['data'] = serializer.data
+        return Response(response_dict)
+
+    @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAuthenticated])
+    def get_list(self, request, version, format=None):
+        '''
+        Show all equipments through get.
+        Example:
+            GET 127.0.0.1:8000/api/1.0/equipment/list/?page=1&size=5
+        Return:
+            All equipments's infomation.
+        '''
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        sensors = self.get_queryset()
+
+        # paginate
+        page = RecordPagination()
+        page_list = page.paginate_queryset(
+            sensors, request, view=self)
+        serializer = self.get_serializer(page_list, many=True)
+
+        response_dict['code'] = 200
+        response_dict['message'] = 'Success'
+        response_dict['current_page'] = page.page.number
+        response_dict['num_pages'] = page.page.paginator.num_pages
+        response_dict['per_page'] = page.page.paginator.per_page
+        response_dict['total_size'] = len(sensors)
         response_dict['data'] = serializer.data
         return Response(response_dict)
 

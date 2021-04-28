@@ -1,6 +1,5 @@
-import equipment
 from account.serializers import UserSerializer
-from data.models import Sensor, SensorRecord
+from data.models import Sensor, SensorRecord, Data
 from equipment.models import Equipment
 
 from rest_framework import serializers
@@ -8,7 +7,7 @@ from rest_framework import serializers
 
 def get_equipment(id='', name=''):
     '''
-    get Equipment.object by id or name. 
+    get Equipment.object by id or name.
     '''
 
     equipment = None
@@ -75,9 +74,27 @@ class SensorRecordSerializer(serializers.ModelSerializer):
 
 
 class DataSerializer(serializers.ModelSerializer):
-    sensor = SensorSerializer(required=False)
+    sensor = SensorSerializer(read_only=True)
+    key = serializers.CharField(write_only=True)
+
+    def validate_key(self, value):
+        """
+        Check that the sensor.
+        """
+        try:
+            sensor = Sensor.objects.get(key=value)
+        except:
+            raise serializers.ValidationError("Invalidate key")
+        return sensor
+
+    def create(self, validated_data):
+        print(validated_data)
+        sensor = validated_data.pop('key')
+        data = Data.objects.create(**validated_data, sensor=sensor)
+        return data
 
     class Meta:
-        model = SensorRecord
-        fields = ('sensor', 'value', 'unit', 'measured_time', 'created_time')
-        depth = 1
+        model = Data
+        fields = ('sensor', 'key', 'value', 'unit',
+                  'measured_time', 'created_time')
+        # depth = 1
