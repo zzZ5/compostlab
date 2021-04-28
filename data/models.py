@@ -67,6 +67,6 @@ class Data(models.Model):
 
     class Meta:
         db_table = "data"
-        ordering = ["-created_time"]
+        ordering = ["-measured_time"]
         verbose_name = "Data"
         verbose_name_plural = "Data"
