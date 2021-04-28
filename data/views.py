@@ -4,7 +4,7 @@ import time
 
 from compostlab.utils.pagination import RecordPagination
 from data.models import Sensor, Data
-from data.serializers import DataSerializer, SensorSerializer
+from data.serializers import DataSerializer, SensorSerializer, SensorRecordSerializer
 
 from rest_framework import status
 from rest_framework.decorators import action
@@ -127,6 +127,34 @@ class SensorViewSet(GenericViewSet):
         sensor = self.get_object()
         serializer = self.get_serializer(sensor)
         response_dict['message'] = 'Success'
+        response_dict['data'] = serializer.data
+        return Response(response_dict)
+
+    @ action(methods=['get'], detail=True, url_path='record', permission_classes=[IsAuthenticated])
+    def get_record(self, request, version, pk, format=None):
+        '''
+        Show sensor's all Record through get.
+        Example:
+            GET 127.0.0.1:8000/api/1.0/sensor/4/record/?page=1&size=3
+        Return:
+            All records of this equipments.
+        '''
+
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        sensor = self.get_object()
+        sensorRecords = sensor.sensorrecord.all()
+
+        page = RecordPagination()
+        page_list = page.paginate_queryset(
+            sensorRecords, request, view=self)
+        serializer = SensorRecordSerializer(page_list, many=True)
+
+        response_dict['code'] = 200
+        response_dict['message'] = 'Success'
+        response_dict['current_page'] = page.page.number
+        response_dict['num_pages'] = page.page.paginator.num_pages
+        response_dict['per_page'] = page.page.paginator.per_page
+        response_dict['total_size'] = len(sensorRecords)
         response_dict['data'] = serializer.data
         return Response(response_dict)
 
