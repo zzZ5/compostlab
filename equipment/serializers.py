@@ -32,21 +32,21 @@ def save_equipment_record(name, old, new, modifier, equipment):
 
 class EquipmentSerializer(serializers.ModelSerializer):
 
-    sensors = SensorSerializer(required=False, many=True)
+    sensor = SensorSerializer(required=False, many=True)
 
     class Meta:
         model = Equipment
         fields = ('id', 'name', 'name_brief', 'type',
-                  'descript', 'sensors', 'created_time')
+                  'descript', 'sensor', 'created_time')
         depth = 1
 
     def update(self, instance, validated_data, modifier):
-        sensors_data = validated_data.pop('sensors')
+        sensor_data = validated_data.pop('sensor')
         sensors = []
-        for i in sensors_data:
+        for i in sensor_data:
             sensors.append(get_sensor(**i))
-        if save_equipment_record('sensors', list(instance.sensors.all()), sensors, modifier, instance):
-            instance.sensors.set(sensors)
+        if save_equipment_record('sensor', list(instance.sensor.all()), sensors, modifier, instance):
+            instance.sensor.set(sensors)
 
         name = validated_data.get('name', instance.name)
         if save_equipment_record('name', instance.name, name, modifier, instance):

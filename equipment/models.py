@@ -17,8 +17,8 @@ class Equipment(models.Model):
     descript = models.CharField(max_length=256, null=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
-    def sensors_display(self):
-        return "\n".join([sensor.name for sensor in self.sensors.all()])
+    def sensor_display(self):
+        return "\n".join([sensor.name for sensor in self.sensor.all()])
 
     def __str__(self):
         return self.name

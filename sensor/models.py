@@ -22,7 +22,7 @@ class Sensor(models.Model):
     descript = models.CharField(max_length=256, null=True)
 
     equipment = models.ForeignKey(
-        Equipment, null=True, on_delete=models.SET_NULL, related_name='%(class)ss')
+        Equipment, null=True, on_delete=models.SET_NULL, related_name='%(class)s')
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
