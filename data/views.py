@@ -28,7 +28,6 @@ class DataViewSet(GenericViewSet):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
 
         if "data" in request.data:
-            print(request.data)
             serializer = DataSerializer(data=request.data['data'], many=True)
         else:
             serializer = DataSerializer(data=request.data)
