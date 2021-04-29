@@ -6,14 +6,14 @@ from django.db import models
 
 
 class Review(models.Model):
-
+    is_passed = models.BooleanField(null=True)
     reply = models.CharField(max_length=128)
     user = models.ForeignKey(
         User, null=True, on_delete=models.SET_NULL, related_name='%(class)s')
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.reply
+        return self.is_passed
 
     class Meta:
         db_table = "experiment_review"
@@ -27,10 +27,10 @@ class Experiment(models.Model):
     name = models.CharField(max_length=128, unique=True)
     site = models.CharField(max_length=128, unique=True)
     descript = models.CharField(max_length=256, null=True)
-    equipments = models.ManyToManyField(Equipment, related_name='%(class)s')
+    equipment = models.ManyToManyField(Equipment, related_name='%(class)s')
     begin_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
-    users = models.ManyToManyField(
+    user = models.ManyToManyField(
         User,  related_name='%(class)s_use')
     owner = models.ForeignKey(
         User, null=True, on_delete=models.SET_NULL, related_name='%(class)s_own')
@@ -50,6 +50,12 @@ class Experiment(models.Model):
     review = OneToOneField(
         Review, null=True, on_delete=models.CASCADE, related_name='%(class)s')
     created_time = models.DateTimeField(auto_now_add=True)
+
+    def equipment_display(self):
+        return "\n".join([equipment.name for equipment in self.equipments.all()])
+
+    def user_display(self):
+        return "\n".join([user.name for user in self.users.all()])
 
     def __str__(self):
         return self.name
