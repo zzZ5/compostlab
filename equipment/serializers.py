@@ -1,4 +1,5 @@
 from account.serializers import UserSerializer
+from compostlab.utils.relatedfield import RelatedFieldAlternative
 from data.models import Sensor
 from data.serializers import SensorSerializer
 from equipment.models import Equipment,  EquipmentRecord
@@ -32,7 +33,8 @@ def save_equipment_record(name, old, new, modifier, equipment):
 
 class EquipmentSerializer(serializers.ModelSerializer):
 
-    sensor = SensorSerializer(required=False, many=True)
+    sensor = RelatedFieldAlternative(queryset=Sensor.objects.all(
+    ), serializer=SensorSerializer,  required=False, many=True)
 
     class Meta:
         model = Equipment
