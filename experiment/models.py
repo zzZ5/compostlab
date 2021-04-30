@@ -8,7 +8,7 @@ from django.db import models
 class Experiment(models.Model):
 
     name = models.CharField(max_length=128, unique=True)
-    site = models.CharField(max_length=128, unique=True)
+    site = models.CharField(max_length=128)
     descript = models.CharField(max_length=256, null=True)
     equipment = models.ManyToManyField(Equipment, related_name='%(class)s')
     begin_time = models.DateTimeField(null=True)

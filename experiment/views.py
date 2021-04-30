@@ -1,6 +1,6 @@
 from compostlab.utils.pagination import RecordPagination
-from equipment.models import Equipment
-from equipment.serializers import EquipmentSerializer, EquipmentRecordSerializer
+from experiment.models import Experiment
+from experiment.serializers import ExperimentSerializer
 
 from rest_framework import status
 from rest_framework.decorators import action
@@ -10,19 +10,23 @@ from rest_framework.viewsets import GenericViewSet
 
 
 class ExperimentViewSet(GenericViewSet):
-    queryset = Equipment.objects.all()
-    serializer_class = EquipmentSerializer
+    queryset = Experiment.objects.all()
+    serializer_class = ExperimentSerializer
     permission_classes = (IsAuthenticated,)
 
-    @ action(methods=['post'], detail=False, url_path='create', permission_classes=[IsAdminUser])
-    def create_equipment(self, request, version, format=None):
+    @ action(methods=['post'], detail=False, url_path='create', permission_classes=[IsAuthenticated])
+    def create_experiment(self, request, version, format=None):
         '''
-        Create a new Equipment through post.
+        Create a new Experiment through post.
         Example:
             "name": "test1"
-            "name_brief": "t1"
-            "type": "RE"
+            "site": "研究院"
             "descript": "this is a test equipment."
+            "equipment": "[1 ]"
+            "begin_time" : "2021-04-16 13:41:35"
+            "end_time" : "2021-05-16 13:40:35"
+            "user" : [1, 2]
+            "owner" : 1
         Return:
             if success, return equipment's information.
         '''
@@ -45,28 +49,28 @@ class ExperimentViewSet(GenericViewSet):
     @ action(methods=['get'], detail=True, url_path='info', permission_classes=[IsAuthenticated])
     def get(self, request, version, pk, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        equipment = self.get_object()
-        serializer = EquipmentSerializer(equipment)
+        experiment = self.get_object()
+        serializer = ExperimentSerializer(experiment)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(response_dict)
 
-    @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAuthenticated])
+    @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAdminUser])
     def get_list(self, request, version, format=None):
         '''
         Show all equipments through get.
         Example:
-            GET 127.0.0.1:8000/api/1.0/equipment/list/?page=1&size=5
+            GET 127.0.0.1:8000/api/1.0/experiment/list/?page=1&size=5
         Return:
             All equipments's infomation.
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        equipments = self.get_queryset()
+        experiment = self.get_queryset()
 
         # paginate
         page = RecordPagination()
         page_list = page.paginate_queryset(
-            equipments, request, view=self)
+            experiment, request, view=self)
         serializer = self.get_serializer(page_list, many=True)
 
         response_dict['code'] = 200
@@ -74,35 +78,25 @@ class ExperimentViewSet(GenericViewSet):
         response_dict['current_page'] = page.page.number
         response_dict['num_pages'] = page.page.paginator.num_pages
         response_dict['per_page'] = page.page.paginator.per_page
-        response_dict['total_size'] = len(equipments)
+        response_dict['total_size'] = len(experiment)
         response_dict['data'] = serializer.data
         return Response(response_dict)
 
-    @ action(methods=['get'], detail=True, url_path='record', permission_classes=[IsAuthenticated])
-    def get_record(self, request, version, pk, format=None):
-        '''
-        Show equipment's all Record through get.
-        Example:
-            GET 127.0.0.1:8000/api/1.0/equipment/4/record/?page=1&size=3
-        Return:
-            All records of this equipments.
-        '''
-
+    @ action(methods=['get'], detail=False, url_path='use', permission_classes=[IsAuthenticated])
+    def get(self, request, version, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        equipment = self.get_object()
-        equipmentRecords = equipment.equipmentrecord.all()
-
-        page = RecordPagination()
-        page_list = page.paginate_queryset(
-            equipmentRecords, request, view=self)
-        serializer = EquipmentRecordSerializer(page_list, many=True)
-
-        response_dict['code'] = 200
+        experiment = request.user.experiment_use
+        serializer = self.get_serializer(experiment, many=True)
         response_dict['message'] = 'Success'
-        response_dict['current_page'] = page.page.number
-        response_dict['num_pages'] = page.page.paginator.num_pages
-        response_dict['per_page'] = page.page.paginator.per_page
-        response_dict['total_size'] = len(equipmentRecords)
+        response_dict['data'] = serializer.data
+        return Response(response_dict)
+
+    @ action(methods=['get'], detail=False, url_path='own', permission_classes=[IsAuthenticated])
+    def get(self, request, version, format=None):
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        experiment = request.user.experiment_own
+        serializer = self.get_serializer(experiment, many=True)
+        response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(response_dict)
 
@@ -120,14 +114,14 @@ class ExperimentViewSet(GenericViewSet):
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        equipment = self.get_object()
-        serializer = self.get_serializer(equipment)
+        experiment = self.get_object()
+        serializer = self.get_serializer(experiment)
 
-        if equipment.name != request.data['name'] and self.get_queryset().filter(name=request.data['name']):
+        if experiment.name != request.data['name'] and self.get_queryset().filter(name=request.data['name']):
             response_dict['code'] = 400
             response_dict['message'] = 'Existing name'
             return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
-        serializer.update(equipment, request.data, modifier=request.user)
+        serializer.update(experiment, request.data, modifier=request.user)
         response_dict['code'] = 201
         response_dict['message'] = 'Updated successfully'
         response_dict['data'] = serializer.data
