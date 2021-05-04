@@ -48,6 +48,9 @@ class ExperimentViewSet(GenericViewSet):
 
     @ action(methods=['get'], detail=True, url_path='info', permission_classes=[IsAuthenticated])
     def get(self, request, version, pk, format=None):
+        # TODO:
+        # to judge whether this user can view this experiment or not(just owner or user qualified)
+
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = self.get_object()
         serializer = ExperimentSerializer(experiment)
