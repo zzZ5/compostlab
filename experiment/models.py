@@ -48,6 +48,25 @@ class Experiment(models.Model):
         verbose_name_plural = "Experiments"
 
 
+class ExperimentRecord(models.Model):
+
+    record = models.CharField(max_length=256, blank=True)
+    experiment = models.ForeignKey(
+        Experiment, null=True, on_delete=models.CASCADE, related_name='%(class)s')
+    modifier = models.ForeignKey(
+        User, null=True, on_delete=models.SET_NULL)
+    created_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.record
+
+    class Meta:
+        db_table = "experiment_record"
+        ordering = ["-created_time"]
+        verbose_name = "ExperimentRecord"
+        verbose_name_plural = "ExperimentRecords"
+
+
 class Review(models.Model):
     experiment = OneToOneField(
         Experiment, null=False, on_delete=models.CASCADE)
