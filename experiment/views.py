@@ -110,14 +110,14 @@ class ExperimentViewSet(GenericViewSet):
     @ action(methods=['put'], detail=True, url_path='modifyinfo', permission_classes=[IsAdminUser])
     def put(self, request, version, pk, format=None):
         '''
-        Update equpment's infomation.
+        Update experiment's infomation.
         Example:
                 "name": "test1",
                 "name_brief": "t123",
                 "type": "RE",
                 "descript": "test1",
         Return:
-            All equipments's infomation.
+            Expeiment's infomation.
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
