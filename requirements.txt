@@ -1,3 +1,4 @@
+Django>=3.0.8
 django-cors-headers>=3.7.0
 djangorestframework>=3.12.2
 djangorestframework-jwt>=1.11.0
