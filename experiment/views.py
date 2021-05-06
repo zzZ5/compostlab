@@ -46,18 +46,6 @@ class ExperimentViewSet(GenericViewSet):
         response_dict['message'] = serializer.errors
         return Response(response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-    @ action(methods=['get'], detail=True, url_path='info', permission_classes=[IsAuthenticated])
-    def get(self, request, version, pk, format=None):
-        # TODO:
-        # to judge whether this user can view this experiment or not(just owner or user qualified)
-
-        response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        experiment = self.get_object()
-        serializer = ExperimentSerializer(experiment)
-        response_dict['message'] = 'Success'
-        response_dict['data'] = serializer.data
-        return Response(response_dict)
-
     @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAdminUser])
     def get_list(self, request, version, format=None):
         '''
@@ -86,7 +74,7 @@ class ExperimentViewSet(GenericViewSet):
         return Response(response_dict)
 
     @ action(methods=['get'], detail=False, url_path='use', permission_classes=[IsAuthenticated])
-    def get(self, request, version, format=None):
+    def get_use(self, request, version, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = request.user.experiment_use
         serializer = self.get_serializer(experiment, many=True)
@@ -95,13 +83,29 @@ class ExperimentViewSet(GenericViewSet):
         return Response(response_dict)
 
     @ action(methods=['get'], detail=False, url_path='own', permission_classes=[IsAuthenticated])
-    def get(self, request, version, format=None):
+    def get_own(self, request, version, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = request.user.experiment_own
         serializer = self.get_serializer(experiment, many=True)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(response_dict)
+
+    @ action(methods=['get'], detail=True, url_path='info', permission_classes=[IsAuthenticated])
+    def get(self, request, version, pk, format=None):
+        # TODO:
+        # to judge whether this user can view this experiment or not(just owner or user qualified)
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        experiment = self.get_object()
+        if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
+            serializer = ExperimentSerializer(experiment)
+            response_dict['message'] = 'Success'
+            response_dict['data'] = serializer.data
+            return Response(response_dict)
+        else:
+            response_dict['code'] = '403'
+            response_dict['message'] = 'No access permission'
+            return Response(response_dict, status=status.status.HTTP_403_FORBIDDEN)
 
     @ action(methods=['put'], detail=True, url_path='modifyinfo', permission_classes=[IsAdminUser])
     def put(self, request, version, pk, format=None):
