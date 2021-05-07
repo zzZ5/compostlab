@@ -28,6 +28,6 @@ urlpatterns = [
     path('api/<version>/equipment/', include('equipment.urls')),
     path('api/<version>/experiment/', include('experiment.urls')),
     path('api/<version>/sensor/', include('sensor.urls')),
-    url(r'^static/(?P<path>.*)$', static.serve,
-        {'document_root': settings.STATIC_ROOT}, name='static'),
+    # url(r'^static/(?P<path>.*)$', static.serve,
+    #     {'document_root': settings.STATIC_ROOT}, name='static'),
 ]
