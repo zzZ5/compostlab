@@ -109,11 +109,12 @@ class SensorViewSet(GenericViewSet):
 
         response_dict['code'] = 200
         response_dict['message'] = 'Success'
-        response_dict['current_page'] = page.page.number
-        response_dict['num_pages'] = page.page.paginator.num_pages
-        response_dict['per_page'] = page.page.paginator.per_page
-        response_dict['total_size'] = len(sensors)
-        response_dict['data'] = serializer.data
+        data_dict = {'list': serializer.data, 'pagination': {}}
+        data_dict['pagination']['current_page'] = page.page.number
+        data_dict['pagination']['num_pages'] = page.page.paginator.num_pages
+        data_dict['pagination']['per_page'] = page.page.paginator.per_page
+        data_dict['pagination']['total_size'] = len(sensors)
+        response_dict['data'] = data_dict
         return Response(response_dict)
 
     @ action(methods=['get'], detail=True, url_path='record', permission_classes=[IsAuthenticated])
@@ -137,11 +138,12 @@ class SensorViewSet(GenericViewSet):
 
         response_dict['code'] = 200
         response_dict['message'] = 'Success'
-        response_dict['current_page'] = page.page.number
-        response_dict['num_pages'] = page.page.paginator.num_pages
-        response_dict['per_page'] = page.page.paginator.per_page
-        response_dict['total_size'] = len(sensorRecords)
-        response_dict['data'] = serializer.data
+        data_dict = {'list': serializer.data, 'pagination': {}}
+        data_dict['pagination']['current_page'] = page.page.number
+        data_dict['pagination']['num_pages'] = page.page.paginator.num_pages
+        data_dict['pagination']['per_page'] = page.page.paginator.per_page
+        data_dict['pagination']['total_size'] = len(sensorRecords)
+        response_dict['data'] = data_dict
         return Response(response_dict)
 
     @ action(methods=['put'], detail=True, url_path='modifyinfo', permission_classes=[IsAdminUser])

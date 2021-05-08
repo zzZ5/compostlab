@@ -56,21 +56,23 @@ class ExperimentViewSet(GenericViewSet):
             All equipments's infomation.
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        experiment = self.get_queryset()
+        experiments = self.get_queryset()
 
         # paginate
         page = RecordPagination()
         page_list = page.paginate_queryset(
-            experiment, request, view=self)
+            experiments, request, view=self)
         serializer = self.get_serializer(page_list, many=True)
 
         response_dict['code'] = 200
         response_dict['message'] = 'Success'
-        response_dict['current_page'] = page.page.number
-        response_dict['num_pages'] = page.page.paginator.num_pages
-        response_dict['per_page'] = page.page.paginator.per_page
-        response_dict['total_size'] = len(experiment)
-        response_dict['data'] = serializer.data
+        data_dict = {'list': serializer.data, 'pagination': {}}
+        data_dict['pagination']['current_page'] = page.page.number
+        data_dict['pagination']['num_pages'] = page.page.paginator.num_pages
+        data_dict['pagination']['per_page'] = page.page.paginator.per_page
+        data_dict['pagination']['total_size'] = len(experiments)
+        response_dict['data'] = data_dict
+
         return Response(response_dict)
 
     @ action(methods=['get'], detail=False, url_path='use', permission_classes=[IsAuthenticated])
@@ -112,10 +114,21 @@ class ExperimentViewSet(GenericViewSet):
         '''
         Update experiment's infomation.
         Example:
-                "name": "test1",
-                "name_brief": "t123",
-                "type": "RE",
-                "descript": "test1",
+        {
+            "name": "test2",
+            "site": "t2",
+            "descript": "test2",
+            "equipment": [
+                1
+            ],
+            "begin_time": "2021-05-6 13:00:35",
+            "end_time": "2021-05-16 13:40:35",
+            "user": [
+                1,
+                2
+            ],
+            "owner": 1
+        }
         Return:
             Expeiment's infomation.
         '''
