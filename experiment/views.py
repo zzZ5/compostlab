@@ -53,7 +53,7 @@ class ExperimentViewSet(GenericViewSet):
         Example:
             GET 127.0.0.1:8000/api/1.0/experiment/list/?page=1&size=5
         Return:
-            All equipments's infomation.
+            All equipments's information.
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiments = self.get_queryset()
@@ -112,7 +112,7 @@ class ExperimentViewSet(GenericViewSet):
     @ action(methods=['put'], detail=True, url_path='modifyinfo', permission_classes=[IsAdminUser])
     def put(self, request, version, pk, format=None):
         '''
-        Update experiment's infomation.
+        Update experiment's information.
         Example:
         {
             "name": "test2",
@@ -130,7 +130,7 @@ class ExperimentViewSet(GenericViewSet):
             "owner": 1
         }
         Return:
-            Expeiment's infomation.
+            Expeiment's information.
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}

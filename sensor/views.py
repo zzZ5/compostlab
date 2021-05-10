@@ -96,7 +96,7 @@ class SensorViewSet(GenericViewSet):
         Example:
             GET 127.0.0.1:8000/api/1.0/equipment/list/?page=1&size=5
         Return:
-            All equipments's infomation.
+            All equipments's information.
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         sensors = self.get_queryset()
@@ -149,7 +149,7 @@ class SensorViewSet(GenericViewSet):
     @ action(methods=['put'], detail=True, url_path='modifyinfo', permission_classes=[IsAdminUser])
     def put(self, request, version, pk, format=None):
         '''
-        Update sensor's infomation.
+        Update sensor's information.
         Example:
                 "name": "test1",
                 "name_brief": "t123",
@@ -157,7 +157,7 @@ class SensorViewSet(GenericViewSet):
                 "descript": "test1",
                 "equipment": "{"id": "4"}"
         Return:
-            All sensor's infomation.
+            All sensor's information.
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
