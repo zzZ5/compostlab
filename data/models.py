@@ -5,7 +5,7 @@ from django.db import models
 
 class Data(models.Model):
     sensor = models.ForeignKey(
-        Sensor, null=True, on_delete=models.CASCADE)
+        Sensor, null=True, on_delete=models.CASCADE, related_name='%(class)s')
     value = models.FloatField()
     unit = models.CharField(max_length=32, null=True, blank=True)
     measured_time = models.DateTimeField(null=True)
