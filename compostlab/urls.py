@@ -16,9 +16,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from compostlab.utils.jwt import obtain_jwt_token
-from django.views import static
-from django.conf import settings
-from django.conf.urls import url
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,6 +25,4 @@ urlpatterns = [
     path('api/<version>/equipment/', include('equipment.urls')),
     path('api/<version>/experiment/', include('experiment.urls')),
     path('api/<version>/sensor/', include('sensor.urls')),
-    # url(r'^static/(?P<path>.*)$', static.serve,
-    #     {'document_root': settings.STATIC_ROOT}, name='static'),
 ]
