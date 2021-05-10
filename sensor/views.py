@@ -1,3 +1,4 @@
+from data.serializers import DataSerializer
 import hashlib
 import random
 import time
@@ -7,7 +8,7 @@ from sensor.models import Sensor
 from sensor.serializers import SensorSerializer, SensorRecordSerializer
 
 from rest_framework import status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -171,5 +172,16 @@ class SensorViewSet(GenericViewSet):
         serializer.update(sensor, request.data, modifier=request.user)
         response_dict['code'] = 201
         response_dict['message'] = 'Updated successfully'
+        response_dict['data'] = serializer.data
+        return Response(response_dict)
+
+    @ action(methods=['get'], detail=True, url_path='data', permission_classes=[IsAuthenticated])
+    def get_data(self, request, version, pk, format=None):
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        sensor = self.get_object()
+        print(request.data)
+        datas = sensor.data
+        serializer = DataSerializer(datas, many=True)
+        response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(response_dict)
