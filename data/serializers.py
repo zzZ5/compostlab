@@ -20,7 +20,6 @@ class DataSerializer(serializers.ModelSerializer):
         return sensor
 
     def create(self, validated_data):
-        print(validated_data)
         sensor = validated_data.pop('key')
         data = Data.objects.create(**validated_data, sensor=sensor)
         return data
