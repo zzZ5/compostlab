@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 
 class DataSerializer(serializers.ModelSerializer):
-    sensor = SensorSerializer(read_only=True)
+    sensor = serializers.PrimaryKeyRelatedField(read_only=True)
     key = serializers.CharField(write_only=True)
 
     def validate_key(self, value):
