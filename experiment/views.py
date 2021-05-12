@@ -44,7 +44,7 @@ class ExperimentViewSet(GenericViewSet):
 
         response_dict['code'] = 422
         response_dict['message'] = serializer.errors
-        return Response(response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        return Response(data=response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAdminUser])
     def get_list(self, request, version, format=None):
@@ -73,7 +73,7 @@ class ExperimentViewSet(GenericViewSet):
         data_dict['pagination']['total_size'] = len(experiments)
         response_dict['data'] = data_dict
 
-        return Response(response_dict)
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=False, url_path='use', permission_classes=[IsAuthenticated])
     def get_use(self, request, version, format=None):
@@ -82,7 +82,7 @@ class ExperimentViewSet(GenericViewSet):
         serializer = self.get_serializer(experiment, many=True)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
-        return Response(response_dict)
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=False, url_path='own', permission_classes=[IsAuthenticated])
     def get_own(self, request, version, format=None):
@@ -91,7 +91,7 @@ class ExperimentViewSet(GenericViewSet):
         serializer = self.get_serializer(experiment, many=True)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
-        return Response(response_dict)
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=True, url_path='info', permission_classes=[IsAuthenticated])
     def get(self, request, version, pk, format=None):
@@ -103,11 +103,11 @@ class ExperimentViewSet(GenericViewSet):
             serializer = ExperimentSerializer(experiment)
             response_dict['message'] = 'Success'
             response_dict['data'] = serializer.data
-            return Response(response_dict)
+            return Response(data=response_dict, status=status.HTTP_200_OK)
         else:
             response_dict['code'] = '403'
             response_dict['message'] = 'No access permission'
-            return Response(response_dict, status=status.status.HTTP_403_FORBIDDEN)
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
 
     @ action(methods=['put'], detail=True, url_path='modifyinfo', permission_classes=[IsAdminUser])
     def put(self, request, version, pk, format=None):
@@ -142,7 +142,7 @@ class ExperimentViewSet(GenericViewSet):
             response_dict['message'] = 'Existing name'
             return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
         serializer.update(experiment, request.data, modifier=request.user)
-        response_dict['code'] = 201
+        response_dict['code'] = 200
         response_dict['message'] = 'Updated successfully'
         response_dict['data'] = serializer.data
-        return Response(response_dict)
+        return Response(data=response_dict, status=status.HTTP_200_OK)

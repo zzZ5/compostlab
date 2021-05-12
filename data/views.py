@@ -38,7 +38,7 @@ class DataViewSet(GenericViewSet):
             response_dict['code'] = 201
             response_dict['message'] = "success"
             response_dict['data'] = serializer.data
-            return Response(response_dict, status=status.HTTP_201_CREATED)
+            return Response(data=response_dict, status=status.HTTP_201_CREATED)
         response_dict['code'] = 422
         response_dict['message'] = serializer.errors
-        return Response(response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        return Response(data=response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)

@@ -41,7 +41,7 @@ class UserViewSet(GenericViewSet):
             return Response(data=response_dict, status=status.HTTP_201_CREATED)
         response_dict['code'] = 422
         response_dict['message'] = serializer.errors
-        return Response(response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        return Response(data=response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     @ action(methods=['get'], detail=False, url_path='mine')
     def get_myself(self, request, version, format=None):
@@ -72,7 +72,7 @@ class UserViewSet(GenericViewSet):
         serializer.update(request.user, request.data)
         response_dict['message'] = 'Changed successfully'
         response_dict['data'] = serializer.data
-        return Response(response_dict, status=status.HTTP_200_OK)
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=False, url_path='logout')
     def log_out(self, request, version, format=None):
@@ -103,7 +103,7 @@ class UserViewSet(GenericViewSet):
         serializer = self.get_serializer(instance=user)
         response_dict['message'] = 'Success, please log in again'
         response_dict['data'] = serializer.data
-        return Response(response_dict, status=status.HTTP_200_OK)
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=True, url_path='record')
     def get_record(self, request, version, pk, format=None):
@@ -132,4 +132,4 @@ class UserViewSet(GenericViewSet):
         data_dict['pagination']['total_size'] = len(userRecords)
         response_dict['data'] = data_dict
 
-        return Response(response_dict)
+        return Response(data=response_dict, status=status.HTTP_200_OK)
