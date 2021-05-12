@@ -181,6 +181,14 @@ class SensorViewSet(GenericViewSet):
     def get_data(self, request, version, pk, format=None):
         '''
         Get data of this sensor(important).
+        Example:
+            experiment:4    //所属实验
+            step:2  //步长
+            begin_time:2021-04-23 13:00:35  //开始时间
+            end_time:2021-04-24 16:35:36    //结束时间
+            count:3 //数据量，和步长冲突时优先数据量
+        Return:
+            Datas
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
