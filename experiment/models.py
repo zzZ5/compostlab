@@ -18,10 +18,10 @@ class Experiment(models.Model):
     owner = models.ForeignKey(
         User, null=True, on_delete=models.SET_NULL, related_name='%(class)s_own')
 
-    FAILED = 0
+    FAILED = -1
+    APPLYING = 0
     DOING = 1
     DONE = 2
-    APPLYING = 3
     STATUS_CHOICE = (
         (FAILED, "Failed"),
         (DOING, "Doing"),
