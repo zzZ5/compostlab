@@ -1,9 +1,11 @@
-from data.serializers import DataSerializer
+import datetime
 import hashlib
 import random
 import time
 
 from compostlab.utils.pagination import RecordPagination
+from data.serializers import DataSerializer
+from experiment.models import Experiment
 from sensor.models import Sensor
 from sensor.serializers import SensorSerializer, SensorRecordSerializer
 
@@ -88,7 +90,7 @@ class SensorViewSet(GenericViewSet):
         serializer = self.get_serializer(sensor)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
-        return Response(response_dict)
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAuthenticated])
     def get_list(self, request, version, format=None):
@@ -116,7 +118,7 @@ class SensorViewSet(GenericViewSet):
         data_dict['pagination']['per_page'] = page.page.paginator.per_page
         data_dict['pagination']['total_size'] = len(sensors)
         response_dict['data'] = data_dict
-        return Response(response_dict)
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=True, url_path='record', permission_classes=[IsAuthenticated])
     def get_record(self, request, version, pk, format=None):
@@ -145,7 +147,7 @@ class SensorViewSet(GenericViewSet):
         data_dict['pagination']['per_page'] = page.page.paginator.per_page
         data_dict['pagination']['total_size'] = len(sensorRecords)
         response_dict['data'] = data_dict
-        return Response(response_dict)
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['put'], detail=True, url_path='modifyinfo', permission_classes=[IsAdminUser])
     def put(self, request, version, pk, format=None):
@@ -170,18 +172,34 @@ class SensorViewSet(GenericViewSet):
             response_dict['message'] = 'Existing name'
             return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
         serializer.update(sensor, request.data, modifier=request.user)
-        response_dict['code'] = 201
+        response_dict['code'] = 200
         response_dict['message'] = 'Updated successfully'
         response_dict['data'] = serializer.data
-        return Response(response_dict)
+        return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=True, url_path='data', permission_classes=[IsAuthenticated])
     def get_data(self, request, version, pk, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         sensor = self.get_object()
-        print(request.data)
+
+        experiment_id = request.query_params.get('experiment')
+        experiment = Experiment.objects.get(pk=experiment_id)
+        if experiment.status <= 0:
+            response_dict['code'] = 403
+            response_dict['message'] = 'Access prohibited'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+        if sensor.equipment not in experiment.equipment.all():
+            print('==========')
+
+        step = request.query_params.get(
+            'step') if request.query_params.get('step') else 1
+        begin_time = request.query_params.get(
+            'step') if request.query_params.get('begin_time') else 1
+        end_time = request.query_params.get(
+            'step') if request.query_params.get('end_time') else 1
+
         datas = sensor.data
         serializer = DataSerializer(datas, many=True)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
-        return Response(response_dict)
+        return Response(data=response_dict, status=status.HTTP_200_OK)
