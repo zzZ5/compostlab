@@ -27,5 +27,5 @@ class DataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Data
         fields = ('sensor', 'key', 'value', 'unit',
-                  'measured_time', 'created_time')
+                  'measured_time')
         # depth = 1
