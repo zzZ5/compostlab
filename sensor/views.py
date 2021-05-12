@@ -179,6 +179,10 @@ class SensorViewSet(GenericViewSet):
 
     @ action(methods=['get'], detail=True, url_path='data', permission_classes=[IsAuthenticated])
     def get_data(self, request, version, pk, format=None):
+        '''
+        Get data of this sensor(important).
+        '''
+
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         sensor = self.get_object()
 
@@ -186,19 +190,41 @@ class SensorViewSet(GenericViewSet):
         experiment = Experiment.objects.get(pk=experiment_id)
         if experiment.status <= 0:
             response_dict['code'] = 403
-            response_dict['message'] = 'Access prohibited'
+            response_dict['message'] = 'Access prohibited due to status of this experiment'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
         if sensor.equipment not in experiment.equipment.all():
-            print('==========')
+            response_dict['code'] = 403
+            response_dict['message'] = 'Access prohibited because the sensor is not in this experiment'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+        if request.user not in experiment.user.all() and request.user != experiment.owner:
+            response_dict['code'] = 403
+            response_dict['message'] = 'Access prohibited for this user'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
 
-        step = request.query_params.get(
-            'step') if request.query_params.get('step') else 1
-        begin_time = request.query_params.get(
-            'step') if request.query_params.get('begin_time') else 1
-        end_time = request.query_params.get(
-            'step') if request.query_params.get('end_time') else 1
+        if experiment.status == 1:
+            if experiment.end_time < datetime.datetime.now():
+                experiment.status = 2
 
-        datas = sensor.data
+        step = int(request.query_params.get('step')
+                   ) if request.query_params.get('step') else 1
+        begin_time = datetime.datetime.strptime(request.query_params.get(
+            'begin_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('begin_time') else experiment.begin_time
+        end_time = datetime.datetime.strptime(request.query_params.get(
+            'end_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('end_time') else experiment.end_time
+        count = int(request.query_params.get('count')
+                    ) if request.query_params.get('count') else 0
+
+        if begin_time < experiment.begin_time or end_time > experiment.end_time:
+            response_dict['code'] = 403
+            response_dict['message'] = 'Access prohibited for this datetime'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+
+        data_all = sensor.data.filter(
+            measured_time__range=(begin_time, end_time))
+        if count != 0:
+            step = data_all.count() // count + 1
+        datas = data_all[::step]
+
         serializer = DataSerializer(datas, many=True)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
