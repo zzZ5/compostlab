@@ -53,8 +53,8 @@ def jwt_response_payload_handler(token, user=None, request=None):
         "data":
         {
             "user": UserSerializer(user, context={"request": request}).data,
+            "token": "JWT " + token
         },
-        "token": "JWT " + token
     }
 
 
