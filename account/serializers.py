@@ -27,10 +27,22 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    roles = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'is_active',
-                  'is_staff', 'last_login', 'date_joined')
+        fields = ('id', 'username', 'email',
+                  'last_login', 'date_joined', 'roles')
+
+    def get_roles(self, obj):
+        res = []
+        if obj.is_active:
+            res.append('active')
+        if obj.is_staff:
+            res.append('staff')
+        if obj.is_superuser:
+            res.append('superuser')
+        return res
 
     def update(self, instance, validated_data):
         username = validated_data.get('username', instance.username)
