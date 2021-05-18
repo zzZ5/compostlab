@@ -39,7 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
         if obj.is_active:
             res.append('active')
         if obj.is_staff:
-            res.append('staff')
+            res.append('admin')
         if obj.is_superuser:
             res.append('superuser')
         return res
