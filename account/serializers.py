@@ -49,10 +49,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_avatar(self, obj):
         email = obj.email
-        default = "mp"
-        size = 128
         g = Gravatar(email=email)
-        return g.get_image(default=default, size=size)
+        return g.get_image()
 
     def update(self, instance, validated_data):
         username = validated_data.get('username', instance.username)
