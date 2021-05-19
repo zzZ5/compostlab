@@ -2,7 +2,7 @@ from account.models import UserRecord
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from libgravatar import Gravatar
+from compostlab.utils.gravatar import Gravatar
 
 
 def save_user_record(name, old, new, user):
