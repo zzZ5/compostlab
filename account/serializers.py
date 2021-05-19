@@ -2,6 +2,8 @@ from account.models import UserRecord
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from libgravatar import Gravatar
+
 
 def save_user_record(name, old, new, user):
     if old != new:
@@ -28,11 +30,12 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField(read_only=True)
+    avatar = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
         fields = ('id', 'username', 'email',
-                  'last_login', 'date_joined', 'roles')
+                  'last_login', 'date_joined', 'roles', 'avatar')
 
     def get_roles(self, obj):
         res = []
@@ -43,6 +46,13 @@ class UserSerializer(serializers.ModelSerializer):
         if obj.is_superuser:
             res.append('superuser')
         return res
+
+    def get_avatar(self, obj):
+        email = obj.email
+        default = "mp"
+        size = 128
+        g = Gravatar(email=email)
+        return g.get_image(default=default, size=size)
 
     def update(self, instance, validated_data):
         username = validated_data.get('username', instance.username)
