@@ -105,8 +105,8 @@ class UserViewSet(GenericViewSet):
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
-    @ action(methods=['get'], detail=True, url_path='record')
-    def get_record(self, request, version, pk, format=None):
+    @ action(methods=['get'], detail=False, url_path='record')
+    def get_record(self, request, version, format=None):
         '''
         Show user's all record through get.
         Example:
@@ -116,7 +116,7 @@ class UserViewSet(GenericViewSet):
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        user = self.get_object()
+        user = request.user
         userRecords = user.userrecord.all()
         page = RecordPagination()
         page_list = page.paginate_queryset(
