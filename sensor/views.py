@@ -149,7 +149,7 @@ class SensorViewSet(GenericViewSet):
         response_dict['data'] = data_dict
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
-    @ action(methods=['put'], detail=True, url_path='modifyinfo', permission_classes=[IsAdminUser])
+    @ action(methods=['put'], detail=True, url_path='update', permission_classes=[IsAdminUser])
     def put(self, request, version, pk, format=None):
         '''
         Update sensor's information.

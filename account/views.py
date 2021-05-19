@@ -61,7 +61,7 @@ class UserViewSet(GenericViewSet):
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
-    @ action(methods=['put'], detail=False, url_path='modifyinfo')
+    @ action(methods=['put'], detail=False, url_path='update')
     def put(self, request, version, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         serializer = self.get_serializer(instance=request.user)
@@ -70,7 +70,7 @@ class UserViewSet(GenericViewSet):
             response_dict['message'] = 'Existing username'
             return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
         serializer.update(request.user, request.data)
-        response_dict['message'] = 'Changed successfully'
+        response_dict['message'] = 'Updated successfully'
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
 

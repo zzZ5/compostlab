@@ -109,7 +109,7 @@ class ExperimentViewSet(GenericViewSet):
             response_dict['message'] = 'No access permission'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
 
-    @ action(methods=['put'], detail=True, url_path='modifyinfo', permission_classes=[IsAdminUser])
+    @ action(methods=['put'], detail=True, url_path='update', permission_classes=[IsAdminUser])
     def put(self, request, version, pk, format=None):
         '''
         Update experiment's information.
