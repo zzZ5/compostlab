@@ -5,7 +5,8 @@ import time
 from compostlab.utils.pagination import RecordPagination
 from equipment.models import Equipment
 from equipment.serializers import EquipmentSerializer, EquipmentRecordSerializer
-
+import django_filters.rest_framework
+from rest_framework import filters
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -45,6 +46,14 @@ class EquipmentViewSet(GenericViewSet):
     queryset = Equipment.objects.all()
     serializer_class = EquipmentSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = RecordPagination
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
+                       filters.OrderingFilter, filters.SearchFilter,)
+    filter_fields = ('id', 'name', 'name_brief', 'type',
+                     'descript', 'created_time')
+    ordering_fields = ('id', 'name', 'created_time')
+    search_fields = ('id', 'name', 'name_brief', 'type',
+                     'descript')
 
     @ action(methods=['post'], detail=False, url_path='create', permission_classes=[IsAdminUser])
     def create_equipment(self, request, version, format=None):
@@ -93,20 +102,18 @@ class EquipmentViewSet(GenericViewSet):
             All equipments's information.
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        equipments = self.get_queryset()
+        queryset = self.get_queryset()
+        equipments = self.filter_queryset(queryset)
+        page_list = self.paginate_queryset(equipments)
 
-        # paginate
-        page = RecordPagination()
-        page_list = page.paginate_queryset(
-            equipments, request, view=self)
         serializer = self.get_serializer(page_list, many=True)
 
         response_dict['code'] = 200
         response_dict['message'] = 'Success'
         data_dict = {'list': serializer.data, 'pagination': {}}
-        data_dict['pagination']['current_page'] = page.page.number
-        data_dict['pagination']['num_pages'] = page.page.paginator.num_pages
-        data_dict['pagination']['per_page'] = page.page.paginator.per_page
+        data_dict['pagination']['current_page'] = self.paginator.page.number
+        data_dict['pagination']['num_pages'] = self.paginator.page.paginator.num_pages
+        data_dict['pagination']['per_page'] = self.paginator.page.paginator.per_page
         data_dict['pagination']['total_size'] = len(equipments)
         response_dict['data'] = data_dict
 
