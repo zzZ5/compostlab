@@ -8,15 +8,14 @@ def custom_exception_handler(exc, context):
 
     # Now add the HTTP status code to the response.
     if response is not None:
-        print(response.data)
         response.data.clear()
         response.data['code'] = response.status_code
         response.data['data'] = []
-
         if response.status_code == 404:
             try:
                 response.data['message'] = response.data.pop('detail')
                 response.data['message'] = "Not found"
+
             except KeyError:
                 response.data['message'] = "Not found"
 
