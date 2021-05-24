@@ -83,7 +83,7 @@ class EquipmentViewSet(GenericViewSet):
         response_dict['message'] = serializer.errors
         return Response(data=response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-    @ action(methods=['get'], detail=True, url_path='info', permission_classes=[IsAuthenticated])
+    @ action(methods=['get'], detail=True, url_path='detail', permission_classes=[IsAuthenticated])
     def get(self, request, version, pk, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         equipment = self.get_object()

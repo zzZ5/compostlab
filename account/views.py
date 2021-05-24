@@ -52,7 +52,7 @@ class UserViewSet(GenericViewSet):
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
-    @ action(methods=['get'], detail=True, url_path='info')
+    @ action(methods=['get'], detail=True, url_path='detail')
     def get(self, request, version, pk, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         user = self.get_object()
