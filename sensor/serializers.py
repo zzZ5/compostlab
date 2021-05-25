@@ -33,7 +33,7 @@ class SensorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sensor
-        fields = ('id', 'name', 'name_brief', 'key', 'type',
+        fields = ('id', 'name', 'abbreviation', 'key', 'type',
                   'descript', 'equipment', 'created_time')
         # depth = 1
 
@@ -47,9 +47,10 @@ class SensorSerializer(serializers.ModelSerializer):
         if save_sensor_record('name', instance.name, name, modifier, instance):
             instance.name = name
 
-        name_brief = validated_data.get('name_brief', instance.name_brief)
-        if save_sensor_record('name_brief', instance.name_brief, name_brief, modifier, instance):
-            instance.name_brief = name_brief
+        abbreviation = validated_data.get(
+            'abbreviation', instance.abbreviation)
+        if save_sensor_record('abbreviation', instance.abbreviation, abbreviation, modifier, instance):
+            instance.abbreviation = abbreviation
 
         type = validated_data.get('type', instance.type)
         if save_sensor_record('type', instance.type, type, modifier, instance):

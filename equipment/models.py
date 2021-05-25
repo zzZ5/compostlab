@@ -5,7 +5,7 @@ from django.db import models
 class Equipment(models.Model):
 
     name = models.CharField(max_length=128, unique=True)
-    name_brief = models.CharField(max_length=64, null=True)
+    abbreviation = models.CharField(max_length=64, null=True)
 
     REACTOR = 'RE'
     TYPE_CHOICE = (

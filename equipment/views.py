@@ -49,10 +49,10 @@ class EquipmentViewSet(GenericViewSet):
     pagination_class = RecordPagination
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
                        filters.OrderingFilter, filters.SearchFilter,)
-    filter_fields = ('id', 'name', 'name_brief', 'type',
+    filter_fields = ('id', 'name', 'abbreviation', 'type',
                      'descript', 'created_time')
     ordering_fields = ('id', 'name', 'created_time')
-    search_fields = ('id', 'name', 'name_brief', 'type',
+    search_fields = ('id', 'name', 'abbreviation', 'type',
                      'descript')
 
     @ action(methods=['post'], detail=False, url_path='create', permission_classes=[IsAdminUser])
@@ -61,7 +61,7 @@ class EquipmentViewSet(GenericViewSet):
         Create a new Equipment through post.
         Example:
             "name": "test1"
-            "name_brief": "t1"
+            "abbreviation": "t1"
             "type": "RE"
             "descript": "this is a test equipment."
         Return:
@@ -155,7 +155,7 @@ class EquipmentViewSet(GenericViewSet):
         Update equpment's information.
         Example:
                 "name": "test1",
-                "name_brief": "t123",
+                "abbreviation": "t123",
                 "type": "RE",
                 "descript": "test1",
         Return:

@@ -55,7 +55,7 @@ class SensorViewSet(GenericViewSet):
         Create a new Equipment through post.
         Example:
             "name": "test1"
-            "name_brief": "t1"
+            "abbreviation": "t1"
             "type": "T"
             "descript": "this is a test sensor."
             "equipment": "{"id": "4"}"
@@ -155,7 +155,7 @@ class SensorViewSet(GenericViewSet):
         Update sensor's information.
         Example:
                 "name": "test1",
-                "name_brief": "t123",
+                "abbreviation": "t123",
                 "type": "RE",
                 "descript": "test1",
                 "equipment": "{"id": "4"}"

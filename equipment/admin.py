@@ -13,7 +13,7 @@ class SensorAdminForm(ModelForm):
 
     class Meta:
         model = Sensor
-        fields = ['name', 'name_brief', 'type']
+        fields = ['name', 'abbreviation', 'type']
 
     def __init__(self, *args, **kwargs):
         super(SensorAdminForm, self).__init__(*args, **kwargs)
@@ -24,11 +24,11 @@ class SensorAdminForm(ModelForm):
 
 class EquipmentAdmin(admin.ModelAdmin):
     form = SensorAdminForm
-    list_display = ('name', 'name_brief', 'pk', 'type',
+    list_display = ('name', 'abbreviation', 'pk', 'type',
                     'descript', 'sensor_display', 'created_time')
     list_filter = ['created_time']
     fieldsets = [
-        ('equipment name', {'fields': ['name', 'name_brief']}),
+        ('equipment name', {'fields': ['name', 'abbreviation']}),
         ('equipment information', {'fields': [
          'type', 'descript', 'sensor']}),
         ('created_time', {'fields': ['created_time']}),
