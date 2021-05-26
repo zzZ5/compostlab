@@ -1,6 +1,5 @@
 from data.models import Data
 from sensor.models import Sensor
-from sensor.serializers import SensorSerializer
 
 from rest_framework import serializers
 
