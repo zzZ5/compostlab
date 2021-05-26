@@ -1,7 +1,7 @@
 from account.serializers import UserSerializer
 from compostlab.utils.relatedfield import RelatedFieldAlternative
 from data.models import Sensor
-from data.serializers import SensorSerializer
+from sensor.serializers import SensorSerializer
 from equipment.models import Equipment,  EquipmentRecord
 
 from rest_framework import serializers
@@ -46,7 +46,7 @@ class EquipmentSerializer(serializers.ModelSerializer):
         sensor_data = validated_data.pop('sensor')
         sensors = []
         for i in sensor_data:
-            sensors.append(get_sensor(**i))
+            sensors.append(get_sensor(id=i))
         if save_equipment_record('sensor', list(instance.sensor.all()), sensors, modifier, instance):
             instance.sensor.set(sensors)
 
