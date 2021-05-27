@@ -2,6 +2,8 @@ from compostlab.utils.pagination import RecordPagination
 from experiment.models import Experiment
 from experiment.serializers import ExperimentSerializer
 
+import django_filters.rest_framework
+from rest_framework import filters
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -13,6 +15,13 @@ class ExperimentViewSet(GenericViewSet):
     queryset = Experiment.objects.all()
     serializer_class = ExperimentSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = RecordPagination
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
+                       filters.OrderingFilter, filters.SearchFilter,)
+    filter_fields = ('id', 'name', 'site', 'descript', 'begin_time',
+                     'end_time', 'user', 'owner', 'status', 'created_time')
+    ordering_fields = ('id', 'name', 'created_time')
+    search_fields = ('name', 'site', 'descript')
 
     @ action(methods=['post'], detail=False, url_path='create', permission_classes=[IsAuthenticated])
     def create_experiment(self, request, version, format=None):
@@ -46,7 +55,7 @@ class ExperimentViewSet(GenericViewSet):
         response_dict['message'] = serializer.errors
         return Response(data=response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-    @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAdminUser])
+    @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAuthenticated])
     def get_list(self, request, version, format=None):
         '''
         Show all equipments through get.
@@ -56,20 +65,17 @@ class ExperimentViewSet(GenericViewSet):
             All equipments's information.
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        experiments = self.get_queryset()
-
-        # paginate
-        page = RecordPagination()
-        page_list = page.paginate_queryset(
-            experiments, request, view=self)
+        queryset = self.get_queryset()
+        experiments = self.filter_queryset(queryset)
+        page_list = self.paginate_queryset(experiments)
         serializer = self.get_serializer(page_list, many=True)
 
         response_dict['code'] = 200
         response_dict['message'] = 'Success'
         data_dict = {'list': serializer.data, 'pagination': {}}
-        data_dict['pagination']['current_page'] = page.page.number
-        data_dict['pagination']['num_pages'] = page.page.paginator.num_pages
-        data_dict['pagination']['per_page'] = page.page.paginator.per_page
+        data_dict['pagination']['current_page'] = self.paginator.page.number
+        data_dict['pagination']['num_pages'] = self.paginator.page.paginator.num_pages
+        data_dict['pagination']['per_page'] = self.paginator.page.paginator.per_page
         data_dict['pagination']['total_size'] = len(experiments)
         response_dict['data'] = data_dict
 
@@ -95,7 +101,6 @@ class ExperimentViewSet(GenericViewSet):
 
     @ action(methods=['get'], detail=True, url_path='detail', permission_classes=[IsAuthenticated])
     def get(self, request, version, pk, format=None):
-        # TODO:
         # to judge whether this user can view this experiment or not(just owner or user qualified)
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = self.get_object()

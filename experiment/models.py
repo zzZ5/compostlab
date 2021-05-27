@@ -10,7 +10,8 @@ class Experiment(models.Model):
     name = models.CharField(max_length=128, unique=True)
     site = models.CharField(max_length=128)
     descript = models.CharField(max_length=256, null=True)
-    equipment = models.ManyToManyField(Equipment, related_name='%(class)s')
+    equipment = models.ManyToManyField(
+        Equipment,  blank=True, related_name='%(class)s')
     begin_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
     user = models.ManyToManyField(
@@ -24,9 +25,9 @@ class Experiment(models.Model):
     DONE = 2
     STATUS_CHOICE = (
         (FAILED, "Failed"),
+        (APPLYING, "Applying"),
         (DOING, "Doing"),
-        (DONE, "Done"),
-        (APPLYING, "Applying")
+        (DONE, "Done")
     )
     status = models.IntegerField(choices=STATUS_CHOICE, default=APPLYING)
 
