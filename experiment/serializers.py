@@ -62,7 +62,11 @@ class ExperimentSerializer(serializers.ModelSerializer):
         end_time = validated_data.get('end_time', instance.end_time)
         if save_experiment_record('end_time', instance.end_time, end_time, modifier, instance):
             instance.end_time = end_time
-
+        instance.status = 0
+        try:
+            instance.review.delete()
+        except:
+            pass
         instance.save()
         return instance
 

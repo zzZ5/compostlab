@@ -114,7 +114,7 @@ class ExperimentViewSet(GenericViewSet):
             response_dict['message'] = 'No access permission'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
 
-    @ action(methods=['put'], detail=True, url_path='update', permission_classes=[IsAdminUser])
+    @ action(methods=['put'], detail=True, url_path='update', permission_classes=[IsAuthenticated])
     def put(self, request, version, pk, format=None):
         '''
         Update experiment's information.
@@ -142,12 +142,17 @@ class ExperimentViewSet(GenericViewSet):
         experiment = self.get_object()
         serializer = self.get_serializer(experiment)
 
-        if experiment.name != request.data['name'] and self.get_queryset().filter(name=request.data['name']):
-            response_dict['code'] = 400
-            response_dict['message'] = 'Existing name'
-            return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
-        serializer.update(experiment, request.data, modifier=request.user)
-        response_dict['code'] = 200
-        response_dict['message'] = 'Updated successfully'
-        response_dict['data'] = serializer.data
-        return Response(data=response_dict, status=status.HTTP_200_OK)
+        if request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
+            if experiment.name != request.data['name'] and self.get_queryset().filter(name=request.data['name']):
+                response_dict['code'] = 400
+                response_dict['message'] = 'Existing name'
+                return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
+            serializer.update(experiment, request.data, modifier=request.user)
+            response_dict['code'] = 200
+            response_dict['message'] = 'Updated successfully'
+            response_dict['data'] = serializer.data
+            return Response(data=response_dict, status=status.HTTP_200_OK)
+        else:
+            response_dict['code'] = '403'
+            response_dict['message'] = 'No access permission'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
