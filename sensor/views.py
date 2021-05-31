@@ -9,8 +9,10 @@ from experiment.models import Experiment
 from sensor.models import Sensor
 from sensor.serializers import SensorSerializer, SensorRecordSerializer
 
+import django_filters.rest_framework
+from rest_framework import filters
 from rest_framework import status
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -48,6 +50,13 @@ class SensorViewSet(GenericViewSet):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = RecordPagination
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
+                       filters.OrderingFilter, filters.SearchFilter,)
+    filter_fields = ('id', 'name', 'abbreviation', 'key',
+                     'type', 'descript', 'equipment', 'created_time')
+    ordering_fields = ('id', 'name', 'created_time')
+    search_fields = ('name', 'abbreviation', 'descript')
 
     @ action(methods=['post'], detail=False, url_path='create', permission_classes=[IsAdminUser])
     def create_sensor(self, request, version, format=None):
@@ -102,22 +111,20 @@ class SensorViewSet(GenericViewSet):
             All equipments's information.
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        sensors = self.get_queryset()
-
-        # paginate
-        page = RecordPagination()
-        page_list = page.paginate_queryset(
-            sensors, request, view=self)
+        queryset = self.get_queryset()
+        sensors = self.filter_queryset(queryset)
+        page_list = self.paginate_queryset(sensors)
         serializer = self.get_serializer(page_list, many=True)
 
         response_dict['code'] = 200
         response_dict['message'] = 'Success'
         data_dict = {'list': serializer.data, 'pagination': {}}
-        data_dict['pagination']['current_page'] = page.page.number
-        data_dict['pagination']['num_pages'] = page.page.paginator.num_pages
-        data_dict['pagination']['per_page'] = page.page.paginator.per_page
+        data_dict['pagination']['current_page'] = self.paginator.page.number
+        data_dict['pagination']['num_pages'] = self.paginator.page.paginator.num_pages
+        data_dict['pagination']['per_page'] = self.paginator.page.paginator.per_page
         data_dict['pagination']['total_size'] = len(sensors)
         response_dict['data'] = data_dict
+
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=True, url_path='record', permission_classes=[IsAuthenticated])
