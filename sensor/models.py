@@ -12,8 +12,8 @@ class Sensor(models.Model):
     TEMPERQTURE = 'T'
     HUMIDITY = 'H'
     TYPE_CHOICE = (
-        (TEMPERQTURE, "Temperature sensor"),
-        (HUMIDITY, "Humidity sensor")
+        (TEMPERQTURE, "Temperature Sensor"),
+        (HUMIDITY, "Humidity Sensor")
     )
     type = models.CharField(
         max_length=32, choices=TYPE_CHOICE, default=TEMPERQTURE)
