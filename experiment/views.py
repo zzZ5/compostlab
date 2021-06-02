@@ -1,6 +1,6 @@
 from compostlab.utils.pagination import RecordPagination
 from experiment.models import Experiment
-from experiment.serializers import ExperimentSerializer
+from experiment.serializers import ExperimentDetailSerializer, ExperimentSerializer
 
 import django_filters.rest_framework
 from rest_framework import filters
@@ -105,7 +105,7 @@ class ExperimentViewSet(GenericViewSet):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = self.get_object()
         if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
-            serializer = ExperimentSerializer(experiment)
+            serializer = ExperimentDetailSerializer(experiment)
             response_dict['message'] = 'Success'
             response_dict['data'] = serializer.data
             return Response(data=response_dict, status=status.HTTP_200_OK)

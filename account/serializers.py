@@ -16,10 +16,15 @@ def save_user_record(name, old, new, user):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
+    password = serializers.CharField(write_only=True)
+    roles = serializers.SerializerMethodField(read_only=True)
+    avatar = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password', 'is_active',
-                  'is_staff', 'is_superuser', 'last_login', 'date_joined')
+        fields = ('id', 'username', 'email', 'password', 'is_active', 'is_staff',
+                  'is_superuser', 'last_login', 'date_joined', 'roles', 'avatar')
 
     def create(self, validated_data):
         user = User(**validated_data)
@@ -27,15 +32,17 @@ class UserDetailSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def update(self, instance, validated_data):
+        username = validated_data.get('username', instance.username)
+        if save_user_record('username', instance.username, username, instance):
+            instance.username = username
 
-class UserSerializer(serializers.ModelSerializer):
-    roles = serializers.SerializerMethodField(read_only=True)
-    avatar = serializers.SerializerMethodField(read_only=True)
+        email = validated_data.get('email', instance.email)
+        if save_user_record('email', instance.email, email, instance):
+            instance.email = email
 
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'email',
-                  'last_login', 'date_joined', 'roles', 'avatar')
+        instance.save()
+        return instance
 
     def get_roles(self, obj):
         res = []
@@ -52,17 +59,30 @@ class UserSerializer(serializers.ModelSerializer):
         g = Gravatar(email=email)
         return g.get_image()
 
-    def update(self, instance, validated_data):
-        username = validated_data.get('username', instance.username)
-        if save_user_record('username', instance.username, username, instance):
-            instance.username = username
 
-        email = validated_data.get('email', instance.email)
-        if save_user_record('email', instance.email, email, instance):
-            instance.email = email
+class UserSerializer(serializers.ModelSerializer):
+    roles = serializers.SerializerMethodField(read_only=True)
+    avatar = serializers.SerializerMethodField(read_only=True)
 
-        instance.save()
-        return instance
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'last_login',
+                  'date_joined', 'roles', 'avatar')
+
+    def get_roles(self, obj):
+        res = []
+        if obj.is_active:
+            res.append('active')
+        if obj.is_staff:
+            res.append('admin')
+        if obj.is_superuser:
+            res.append('superuser')
+        return res
+
+    def get_avatar(self, obj):
+        email = obj.email
+        g = Gravatar(email=email)
+        return g.get_image()
 
 
 class UserRecordSerializer(serializers.ModelSerializer):

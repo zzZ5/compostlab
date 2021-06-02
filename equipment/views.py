@@ -1,10 +1,16 @@
+import datetime
 import hashlib
 import random
+from sensor.models import Sensor
 import time
 
 from compostlab.utils.pagination import RecordPagination
 from equipment.models import Equipment
-from equipment.serializers import EquipmentSerializer, EquipmentRecordSerializer
+from equipment.serializers import EquipmentDetailSerializer, EquipmentSerializer, EquipmentRecordSerializer
+from experiment.models import Experiment
+from data.serializers import DataSerializer
+from sensor.serializers import SensorSerializer
+
 import django_filters.rest_framework
 from rest_framework import filters
 from rest_framework import status
@@ -68,7 +74,7 @@ class EquipmentViewSet(GenericViewSet):
             if success, return equipment's information.
         '''
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = EquipmentDetailSerializer(data=request.data)
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         if serializer.is_valid():
@@ -87,7 +93,7 @@ class EquipmentViewSet(GenericViewSet):
     def get(self, request, version, pk, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         equipment = self.get_object()
-        serializer = EquipmentSerializer(equipment)
+        serializer = EquipmentDetailSerializer(equipment)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
@@ -164,7 +170,7 @@ class EquipmentViewSet(GenericViewSet):
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         equipment = self.get_object()
-        serializer = self.get_serializer(equipment)
+        serializer = EquipmentDetailSerializer(equipment)
 
         if equipment.name != request.data['name'] and self.get_queryset().filter(name=request.data['name']):
             response_dict['code'] = 400
@@ -175,3 +181,71 @@ class EquipmentViewSet(GenericViewSet):
         response_dict['message'] = 'Updated successfully'
         response_dict['data'] = serializer.data
         return Response(response_dict, status=status.HTTP_200_OK)
+
+    @ action(methods=['get'], detail=True, url_path='data', permission_classes=[IsAuthenticated])
+    def get_data(self, request, version, pk, format=None):
+        '''
+        Get data of this sensor(important).
+        Example:
+            experiment:4    //所属实验
+            step:2  //步长
+            begin_time:2021-04-23 13:00:35  //开始时间
+            end_time:2021-04-24 16:35:36    //结束时间
+            count:3 //数据量，和步长冲突时优先数据量
+        Return:
+            Datas
+        '''
+
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        equipment = self.get_object()
+
+        experiment_id = request.query_params.get('experiment')
+        experiment = Experiment.objects.get(pk=experiment_id)
+        if experiment.status <= 0:
+            response_dict['code'] = 403
+            response_dict['message'] = 'Access prohibited due to status of this experiment'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+        if equipment not in experiment.equipment.all():
+            response_dict['code'] = 403
+            response_dict['message'] = 'Access prohibited because the exquipment is not in this experiment'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+        if request.user not in experiment.user.all() and request.user != experiment.owner:
+            response_dict['code'] = 403
+            response_dict['message'] = 'Access prohibited for this user'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+
+        if experiment.status == 1:
+            if experiment.end_time < datetime.datetime.now():
+                experiment.status = 2
+
+        step = int(request.query_params.get('step')
+                   ) if request.query_params.get('step') else 1
+        begin_time = datetime.datetime.strptime(request.query_params.get(
+            'begin_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('begin_time') else experiment.begin_time
+        end_time = datetime.datetime.strptime(request.query_params.get(
+            'end_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('end_time') else experiment.end_time
+        count = int(request.query_params.get('count')
+                    ) if request.query_params.get('count') else 0
+
+        if begin_time < experiment.begin_time or end_time > experiment.end_time:
+            response_dict['code'] = 403
+            response_dict['message'] = 'Access prohibited for this datetime'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+
+        data = []
+        for sensor in equipment.sensor.all():
+            temp = {}
+            sensorSerializer = SensorSerializer(sensor)
+            temp.update(sensorSerializer.data)
+            data_all = sensor.data.filter(
+                measured_time__range=(begin_time, end_time))
+            if count != 0:
+                step = data_all.count() // count + 1
+            datas = data_all[::step]
+            dataSerializer = DataSerializer(datas, many=True)
+            temp.update({'data': dataSerializer.data})
+            data.append(temp)
+
+        response_dict['message'] = 'Success'
+        response_dict['data'] = data
+        return Response(data=response_dict, status=status.HTTP_200_OK)

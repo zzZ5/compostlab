@@ -33,6 +33,15 @@ def save_equipment_record(name, old, new, modifier, equipment):
 
 class EquipmentSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = Equipment
+        fields = ('id', 'name', 'abbreviation', 'type',
+                  'descript', 'created_time')
+        depth = 1
+
+
+class EquipmentDetailSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
     sensor = RelatedFieldAlternative(queryset=Sensor.objects.all(
     ), serializer=SensorSerializer,  required=False, many=True)
 

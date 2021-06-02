@@ -56,7 +56,7 @@ class UserViewSet(GenericViewSet):
     def get_myself(self, request, version, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         user = request.user
-        serializer = self.get_serializer(instance=user)
+        serializer = UserDetailSerializer(user)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
@@ -65,7 +65,7 @@ class UserViewSet(GenericViewSet):
     def get(self, request, version, pk, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         user = self.get_object()
-        serializer = self.get_serializer(instance=user)
+        serializer = UserDetailSerializer(user)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
@@ -100,7 +100,7 @@ class UserViewSet(GenericViewSet):
     @ action(methods=['put'], detail=False, url_path='update')
     def put(self, request, version, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        serializer = self.get_serializer(instance=request.user)
+        serializer = UserDetailSerializer(request.user)
         if request.data['username'] != request.user.username and self.get_queryset().filter(username=request.data['username']):
             response_dict['code'] = 400
             response_dict['message'] = 'Existing username'
@@ -136,7 +136,7 @@ class UserViewSet(GenericViewSet):
         user.set_password(request.data['new_password'])
         user.save()
 
-        serializer = self.get_serializer(instance=user)
+        serializer = UserDetailSerializer(user)
         response_dict['message'] = 'Success, please log in again'
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)

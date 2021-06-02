@@ -20,7 +20,7 @@ def save_experiment_record(name, old, new, modifier, experiment):
         return False
 
 
-class ExperimentSerializer(serializers.ModelSerializer):
+class ExperimentDetailSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data, modifier):
 
@@ -70,18 +70,31 @@ class ExperimentSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+    id = serializers.UUIDField(read_only=True)
     equipment = RelatedFieldAlternative(
         queryset=Equipment.objects.all(), serializer=EquipmentSerializer,  required=False, many=True)
-
     user = RelatedFieldAlternative(
         queryset=User.objects.all(), serializer=UserSerializer, required=False, many=True)
-
     owner = RelatedFieldAlternative(
         queryset=User.objects.all(), serializer=UserSerializer)
 
     class Meta:
         model = Experiment
         fields = ('id', 'name', 'site', 'descript', 'equipment', 'begin_time',
+                  'end_time', 'user', 'owner', 'status', 'created_time')
+        depth = 1
+
+
+class ExperimentSerializer(serializers.ModelSerializer):
+
+    user = RelatedFieldAlternative(
+        queryset=User.objects.all(), serializer=UserSerializer, required=False, many=True)
+    owner = RelatedFieldAlternative(
+        queryset=User.objects.all(), serializer=UserSerializer)
+
+    class Meta:
+        model = Experiment
+        fields = ('id', 'name', 'site', 'descript', 'begin_time',
                   'end_time', 'user', 'owner', 'status', 'created_time')
         depth = 1
 
