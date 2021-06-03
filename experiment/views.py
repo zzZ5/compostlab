@@ -84,19 +84,35 @@ class ExperimentViewSet(GenericViewSet):
     @ action(methods=['get'], detail=False, url_path='use', permission_classes=[IsAuthenticated])
     def get_use(self, request, version, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        experiment = request.user.experiment_use
-        serializer = self.get_serializer(experiment, many=True)
+        experiments = request.user.experiment_use
+        page_list = self.paginate_queryset(experiments)
+        serializer = self.get_serializer(page_list, many=True)
+
+        response_dict['code'] = 200
         response_dict['message'] = 'Success'
-        response_dict['data'] = serializer.data
+        data_dict = {'list': serializer.data, 'pagination': {}}
+        data_dict['pagination']['current_page'] = self.paginator.page.number
+        data_dict['pagination']['num_pages'] = self.paginator.page.paginator.num_pages
+        data_dict['pagination']['per_page'] = self.paginator.page.paginator.per_page
+        data_dict['pagination']['total_size'] = len(experiments)
+        response_dict['data'] = data_dict
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=False, url_path='own', permission_classes=[IsAuthenticated])
     def get_own(self, request, version, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        experiment = request.user.experiment_own
-        serializer = self.get_serializer(experiment, many=True)
+        experiments = request.user.experiment_own
+        page_list = self.paginate_queryset(experiments)
+        serializer = self.get_serializer(page_list, many=True)
+
+        response_dict['code'] = 200
         response_dict['message'] = 'Success'
-        response_dict['data'] = serializer.data
+        data_dict = {'list': serializer.data, 'pagination': {}}
+        data_dict['pagination']['current_page'] = self.paginator.page.number
+        data_dict['pagination']['num_pages'] = self.paginator.page.paginator.num_pages
+        data_dict['pagination']['per_page'] = self.paginator.page.paginator.per_page
+        data_dict['pagination']['total_size'] = len(experiments)
+        response_dict['data'] = data_dict
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['get'], detail=True, url_path='detail', permission_classes=[IsAuthenticated])
