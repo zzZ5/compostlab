@@ -40,7 +40,7 @@ class ExperimentViewSet(GenericViewSet):
             if success, return equipment's information.
         '''
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = ExperimentDetailSerializer(data=request.data)
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         if serializer.is_valid():
@@ -156,7 +156,7 @@ class ExperimentViewSet(GenericViewSet):
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = self.get_object()
-        serializer = self.get_serializer(experiment)
+        serializer = ExperimentDetailSerializer(experiment)
 
         if request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
             if experiment.name != request.data['name'] and self.get_queryset().filter(name=request.data['name']):
