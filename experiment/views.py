@@ -1,3 +1,5 @@
+import datetime
+
 from compostlab.utils.pagination import RecordPagination
 from experiment.models import Experiment
 from experiment.serializers import ExperimentDetailSerializer, ExperimentSerializer
@@ -120,6 +122,9 @@ class ExperimentViewSet(GenericViewSet):
         # to judge whether this user can view this experiment or not(just owner or user qualified)
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = self.get_object()
+        if experiment.status == 1:
+            if experiment.end_time < datetime.datetime.now():
+                experiment.status = 2
         if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
             serializer = ExperimentDetailSerializer(experiment)
             response_dict['message'] = 'Success'
