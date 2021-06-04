@@ -4,7 +4,7 @@ from account.serializers import UserSerializer
 from compostlab.utils.relatedfield import RelatedFieldAlternative
 from experiment.models import Experiment, ExperimentRecord, Review
 from equipment.models import Equipment
-from equipment.serializers import EquipmentSerializer
+from equipment.serializers import EquipmentDetailSerializer
 
 from rest_framework import serializers
 
@@ -72,7 +72,7 @@ class ExperimentDetailSerializer(serializers.ModelSerializer):
 
     id = serializers.UUIDField(read_only=True)
     equipment = RelatedFieldAlternative(
-        queryset=Equipment.objects.all(), serializer=EquipmentSerializer,  required=False, many=True)
+        queryset=Equipment.objects.all(), serializer=EquipmentDetailSerializer,  required=False, many=True)
     user = RelatedFieldAlternative(
         queryset=User.objects.all(), serializer=UserSerializer, required=False, many=True)
     owner = RelatedFieldAlternative(
