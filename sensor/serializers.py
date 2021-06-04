@@ -30,12 +30,17 @@ def save_sensor_record(name, old, new, modifier, sensor):
 
 
 class SensorSerializer(serializers.ModelSerializer):
+    data_latest = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Sensor
         fields = ('id', 'name', 'abbreviation', 'key', 'type',
-                  'descript', 'equipment', 'created_time')
+                  'descript', 'equipment', 'data_latest', 'created_time')
         # depth = 1
+
+    def get_data_latest(self, obj):
+        res = obj.data.latest()
+        return res
 
     def update(self, instance, validated_data, modifier):
         equipment_data = validated_data.pop('equipment')

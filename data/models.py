@@ -19,3 +19,4 @@ class Data(models.Model):
         ordering = ["-measured_time"]
         verbose_name = "Data"
         verbose_name_plural = "Data"
+        get_latest_by = 'measured_time'
