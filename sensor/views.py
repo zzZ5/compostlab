@@ -193,7 +193,8 @@ class SensorViewSet(GenericViewSet):
             step:2  //步长
             begin_time:2021-04-23 13:00:35  //开始时间
             end_time:2021-04-24 16:35:36    //结束时间
-            count:3 //数据量，和步长冲突时优先数据量
+            size:
+            page:
         Return:
             Datas
         '''
@@ -226,8 +227,6 @@ class SensorViewSet(GenericViewSet):
             'begin_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('begin_time') else experiment.begin_time
         end_time = datetime.datetime.strptime(request.query_params.get(
             'end_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('end_time') else experiment.end_time
-        count = int(request.query_params.get('count')
-                    ) if request.query_params.get('count') else 0
 
         if begin_time < experiment.begin_time or end_time > experiment.end_time:
             response_dict['code'] = 403
@@ -236,11 +235,10 @@ class SensorViewSet(GenericViewSet):
 
         data_all = sensor.data.filter(
             measured_time__range=(begin_time, end_time))
-        if count != 0:
-            step = data_all.count() // count + 1
         datas = data_all[::step]
 
-        serializer = DataSerializer(datas, many=True)
+        page_list = self.paginate_queryset(datas)
+        serializer = DataSerializer(page_list, many=True)
         response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
