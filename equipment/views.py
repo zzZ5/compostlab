@@ -225,7 +225,7 @@ class EquipmentViewSet(GenericViewSet):
         end_time = datetime.datetime.strptime(request.query_params.get(
             'end_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('end_time') else experiment.end_time
         count = int(request.query_params.get('count')
-                    ) if request.query_params.get('count') else 0
+                    ) if request.query_params.get('count') else 10
 
         if begin_time < experiment.begin_time or end_time > experiment.end_time:
             response_dict['code'] = 403
