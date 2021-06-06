@@ -1,6 +1,7 @@
 from account.serializers import UserSerializer
-from sensor.models import Sensor, SensorRecord
+from data.serializers import DataSerializer
 from equipment.models import Equipment
+from sensor.models import Sensor, SensorRecord
 
 from rest_framework import serializers
 
@@ -39,7 +40,9 @@ class SensorSerializer(serializers.ModelSerializer):
         # depth = 1
 
     def get_data_latest(self, obj):
-        res = obj.data.latest()
+        res = []
+        if obj.data.all():
+            res = DataSerializer(obj.data.latest()).data
         return res
 
     def update(self, instance, validated_data, modifier):
