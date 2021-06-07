@@ -240,5 +240,10 @@ class SensorViewSet(GenericViewSet):
         page_list = self.paginate_queryset(datas)
         serializer = DataSerializer(page_list, many=True)
         response_dict['message'] = 'Success'
-        response_dict['data'] = serializer.data
+        data_dict = {'list': serializer.data, 'pagination': {}}
+        data_dict['pagination']['current_page'] = self.paginator.page.number
+        data_dict['pagination']['num_pages'] = self.paginator.page.paginator.num_pages
+        data_dict['pagination']['per_page'] = self.paginator.page.paginator.per_page
+        data_dict['pagination']['total_size'] = len(datas)
+        response_dict['data'] = data_dict
         return Response(data=response_dict, status=status.HTTP_200_OK)
