@@ -8,7 +8,7 @@ class Data(models.Model):
         Sensor, null=True, on_delete=models.CASCADE, related_name='%(class)s')
     value = models.FloatField()
     unit = models.CharField(max_length=32, null=True, blank=True)
-    measured_time = models.DateTimeField(null=True)
+    measured_time = models.DateTimeField(auto_now_add=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
