@@ -15,6 +15,17 @@ class Sensor(models.Model):
         (TEMPERQTURE, "Temperature Sensor"),
         (HUMIDITY, "Humidity Sensor")
     )
+
+    CELSIUS = '℃'
+    PERCENT = '%'
+
+    UNIT_CHOICE = (
+        (CELSIUS, "Celsius"),
+        (PERCENT, "Percent")
+    )
+
+    unit = models.CharField(
+        max_length=32, choices=UNIT_CHOICE, default=CELSIUS)
     type = models.CharField(
         max_length=32, choices=TYPE_CHOICE, default=TEMPERQTURE)
 

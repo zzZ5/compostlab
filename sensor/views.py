@@ -236,11 +236,12 @@ class SensorViewSet(GenericViewSet):
         data_all = sensor.data.filter(
             measured_time__range=(begin_time, end_time))
         datas = data_all[::step]
-
+        sensorSerializer = self.get_serializer(sensor)
         page_list = self.paginate_queryset(datas)
         serializer = DataSerializer(page_list, many=True)
         response_dict['message'] = 'Success'
         data_dict = {'list': serializer.data, 'pagination': {}}
+        data_dict.update(sensorSerializer.data)
         data_dict['pagination']['current_page'] = self.paginator.page.number
         data_dict['pagination']['num_pages'] = self.paginator.page.paginator.num_pages
         data_dict['pagination']['per_page'] = self.paginator.page.paginator.per_page
