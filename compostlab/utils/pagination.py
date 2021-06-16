@@ -14,4 +14,4 @@ class RecordPagination(PageNumberPagination):
 
         self.page_size = 10
 
-        self.max_page_size = 100
+        self.max_page_size = 1000000
