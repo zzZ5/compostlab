@@ -2,7 +2,7 @@ import datetime
 
 from compostlab.utils.pagination import RecordPagination
 from experiment.models import Experiment
-from experiment.serializers import ExperimentDetailSerializer, ExperimentSerializer
+from experiment.serializers import ExperimentDetailSerializer, ExperimentSerializer, ReviewSerializer
 
 import django_filters.rest_framework
 from rest_framework import filters
@@ -177,3 +177,27 @@ class ExperimentViewSet(GenericViewSet):
             response_dict['code'] = '403'
             response_dict['message'] = 'No access permission'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+
+    @ action(methods=['post'], detail=True, url_path='review', permission_classes=[IsAdminUser])
+    def review(self, request, version, pk, format=None):
+        '''
+        review experiment.
+        Example:
+        {
+            "equipment": 1,
+            "is_passed": true,
+            "reply": "ok"
+        }
+        Return:
+            review's information.
+        '''
+
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        experiment = self.get_object()
+        serializer = ReviewSerializer(data=request.data)
+
+        serializer.update(experiment, request.data, modifier=request.user)
+        response_dict['code'] = 200
+        response_dict['message'] = 'Updated successfully'
+        response_dict['data'] = serializer.data
+        return Response(data=response_dict, status=status.HTTP_200_OK)
