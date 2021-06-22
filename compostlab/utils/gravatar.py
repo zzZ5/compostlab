@@ -66,7 +66,7 @@ class Gravatar(object):
         See more details on `Gravatar Image Requests <http://en.gravatar.com/site/implement/images/>`_.
 
         """
-        base_url = "{protocol}://cdn.v2ex.com/gravatar/" "{hash}{extension}{params}"
+        base_url = "{protocol}://sdn.geekzu.org/avatar/" "{hash}{extension}{params}"
 
         params_dict = {
             "size": size,
