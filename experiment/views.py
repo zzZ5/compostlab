@@ -195,9 +195,7 @@ class ExperimentViewSet(GenericViewSet):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = self.get_object()
         serializer = ReviewSerializer(data=request.data)
-
-        serializer.update(experiment, request.data, modifier=request.user)
         response_dict['code'] = 200
-        response_dict['message'] = 'Updated successfully'
+        response_dict['message'] = 'Success'
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
