@@ -194,8 +194,21 @@ class ExperimentViewSet(GenericViewSet):
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = self.get_object()
-        serializer = ReviewSerializer(data=request.data)
-        response_dict['code'] = 200
-        response_dict['message'] = 'Success'
-        response_dict['data'] = serializer.data
-        return Response(data=response_dict, status=status.HTTP_200_OK)
+        try:
+            experiment.review.delete()
+        except:
+            pass
+        serializer = ReviewSerializer(
+            data={**request.data, 'user': request.user.id, 'experiment': experiment.id})
+
+        if serializer.is_valid():
+            # Successfully created
+            serializer.save()
+            response_dict['code'] = 200
+            response_dict['message'] = 'Success'
+            response_dict['data'] = serializer.data
+            return Response(response_dict, status=status.HTTP_200_OK)
+
+        response_dict['code'] = 422
+        response_dict['message'] = serializer.errors
+        return Response(data=response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)

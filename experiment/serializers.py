@@ -100,9 +100,6 @@ class ExperimentSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    experiment = RelatedFieldAlternative(
-        queryset=Experiment.objects.all(), serializer=ExperimentSerializer)
-    user = UserSerializer()
 
     def create(self, validated_data):
         review = Review(**validated_data)
@@ -110,6 +107,8 @@ class ReviewSerializer(serializers.ModelSerializer):
             review.experiment.status = 1
         else:
             review.experiment.status = -1
+        review.experiment.save()
+        review.save()
         return review
 
     class Meta:
