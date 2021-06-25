@@ -35,7 +35,7 @@ class EquipmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Equipment
-        fields = ('id', 'name', 'abbreviation', 'type',
+        fields = ('id', 'name', 'abbreviation', 'type', 'key',
                   'descript', 'created_time')
         depth = 1
 
@@ -44,10 +44,11 @@ class EquipmentDetailSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
     sensor = RelatedFieldAlternative(queryset=Sensor.objects.all(
     ), serializer=SensorSerializer,  required=False, many=True)
+    key = serializers.CharField(read_only=True)
 
     class Meta:
         model = Equipment
-        fields = ('id', 'name', 'abbreviation', 'type',
+        fields = ('id', 'name', 'abbreviation', 'type', 'key',
                   'descript', 'sensor', 'created_time')
         depth = 1
 

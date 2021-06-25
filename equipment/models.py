@@ -6,6 +6,7 @@ class Equipment(models.Model):
 
     name = models.CharField(max_length=128, unique=True)
     abbreviation = models.CharField(max_length=64, null=True)
+    key = models.CharField(max_length=16, unique=True, null=True)
 
     REACTOR = 'RE'
     TYPE_CHOICE = (

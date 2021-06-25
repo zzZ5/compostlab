@@ -24,13 +24,13 @@ class SensorAdminForm(ModelForm):
 
 class EquipmentAdmin(admin.ModelAdmin):
     form = SensorAdminForm
-    list_display = ('name', 'abbreviation', 'pk', 'type',
+    list_display = ('name', 'abbreviation', 'pk', 'key', 'type',
                     'descript', 'sensor_display', 'created_time')
     list_filter = ['created_time']
     fieldsets = [
         ('equipment name', {'fields': ['name', 'abbreviation']}),
         ('equipment information', {'fields': [
-         'type', 'descript', 'sensor']}),
+         'type', 'key', 'descript', 'sensor']}),
         ('created_time', {'fields': ['created_time']}),
     ]
 

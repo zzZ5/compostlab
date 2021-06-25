@@ -20,7 +20,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 
-def get_random_secret_key(length=15, allowed_chars=None, secret_key=None):
+def get_random_secret_key(length=10, allowed_chars=None, secret_key=None):
     '''
     Generate random string.
 
@@ -74,12 +74,16 @@ class EquipmentViewSet(GenericViewSet):
             if success, return equipment's information.
         '''
 
+        key = get_random_secret_key()
+        while Equipment.objects.filter(key=key):
+            key = get_random_secret_key()
+
         serializer = EquipmentDetailSerializer(data=request.data)
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         if serializer.is_valid():
             # Successfully created
-            serializer.save()
+            serializer.save(key=key)
             response_dict['code'] = 201
             response_dict['message'] = 'Created successfully'
             response_dict['data'] = serializer.data
