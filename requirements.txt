@@ -5,3 +5,4 @@ djangorestframework>=3.12.2
 djangorestframework-jwt>=1.11.0
 django-simpleui>=2021.4.1
 mysqlclient>=2.0.1
+paho-mqtt>=1.5.1
