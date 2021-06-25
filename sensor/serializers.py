@@ -32,6 +32,7 @@ def save_sensor_record(name, old, new, modifier, sensor):
 
 class SensorSerializer(serializers.ModelSerializer):
     data_latest = serializers.SerializerMethodField(read_only=True)
+    key = serializers.CharField(read_only=True)
 
     class Meta:
         model = Sensor
