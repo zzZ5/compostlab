@@ -9,7 +9,7 @@ from django.forms import ModelMultipleChoiceField, ModelForm
 class SensorAdminForm(ModelForm):
     sensor = ModelMultipleChoiceField(
         queryset=Sensor.objects.all(),
-        widget=FilteredSelectMultiple(verbose_name='sensor', is_stacked=False))
+        widget=FilteredSelectMultiple(verbose_name='sensor', is_stacked=False), required=False)
 
     class Meta:
         model = Sensor
