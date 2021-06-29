@@ -1,5 +1,9 @@
-import paho.mqtt.client as mqtt
 import json
+
+from data.serializers import DataSerializer
+from sensor.models import Sensor
+
+import paho.mqtt.client as mqtt
 
 
 class Singleton():
@@ -35,10 +39,23 @@ class Mqtt():
 
     def on_message(self, client, userdata, msg):
         # The callback for when a PUBLISH message is received from the server.
-        print(msg.topic)
-        key = msg.topic.split('/')
+        temp = msg.topic.split('/')
+        if len(temp) < 2:
+            return
+        key = temp[1]
         print(key)
-        print(json.loads(msg.payload))
+        data = json.loads(msg.payload)
+        if(len(key) == 10):
+            print(key)
+            print(data)
+        else:
+            sensor = Sensor.objects.filter(key=key)
+            if len(sensor) == 1:
+                serializer = DataSerializer(data={**data, "key": key})
+                serializer.save()
 
-    def public_message(self, topic, msg, qos=0):
-        self.client.publish(topic=topic, payload=msg, qos=qos)
+    def public_message(self, equipmentKey, msg, qos=0):
+        # format cmd|order
+        # example cmd|restart or heater|on/off
+        self.client.publish(
+            topic="topic/{}".format(equipmentKey), payload=msg, qos=qos)
