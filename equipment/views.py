@@ -218,38 +218,4 @@ class EquipmentViewSet(GenericViewSet):
             response_dict['message'] = 'Access prohibited for this user'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
 
-        if experiment.status == 1:
-            if experiment.end_time < datetime.datetime.now():
-                experiment.status = 2
-
-        step = int(request.query_params.get('step')
-                   ) if request.query_params.get('step') else 1
-        begin_time = datetime.datetime.strptime(request.query_params.get(
-            'begin_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('begin_time') else experiment.begin_time
-        end_time = datetime.datetime.strptime(request.query_params.get(
-            'end_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('end_time') else experiment.end_time
-        count = int(request.query_params.get('count')
-                    ) if request.query_params.get('count') else 0
-
-        if begin_time < experiment.begin_time or end_time > experiment.end_time:
-            response_dict['code'] = 403
-            response_dict['message'] = 'Access prohibited for this datetime'
-            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
-
-        data = []
-        for sensor in equipment.sensor.all():
-            temp = {}
-            sensorSerializer = SensorSerializer(sensor)
-            temp.update(sensorSerializer.data)
-            data_all = sensor.data.filter(
-                measured_time__range=(begin_time, end_time))
-            if count != 0:
-                step = data_all.count() // count + 1
-            datas = data_all[::step]
-            dataSerializer = DataSerializer(datas, many=True)
-            temp.update({'data': dataSerializer.data})
-            data.append(temp)
-
-        response_dict['message'] = 'Success'
-        response_dict['data'] = data
-        return Response(data=response_dict, status=status.HTTP_200_OK)
+        return
