@@ -212,39 +212,39 @@ class SensorViewSet(GenericViewSet):
             response_dict['code'] = 403
             response_dict['message'] = 'Access prohibited because the sensor is not in this experiment'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
-        if request.user not in experiment.user.all() and request.user != experiment.owner:
-            response_dict['code'] = 403
-            response_dict['message'] = 'Access prohibited for this user'
-            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+        if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
+            if experiment.status == 1:
+                if experiment.end_time < datetime.datetime.now():
+                    experiment.status = 2
 
-        if experiment.status == 1:
-            if experiment.end_time < datetime.datetime.now():
-                experiment.status = 2
+            step = int(request.query_params.get('step')
+                       ) if request.query_params.get('step') else 1
+            begin_time = datetime.datetime.strptime(request.query_params.get(
+                'begin_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('begin_time') else experiment.begin_time
+            end_time = datetime.datetime.strptime(request.query_params.get(
+                'end_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('end_time') else experiment.end_time
 
-        step = int(request.query_params.get('step')
-                   ) if request.query_params.get('step') else 1
-        begin_time = datetime.datetime.strptime(request.query_params.get(
-            'begin_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('begin_time') else experiment.begin_time
-        end_time = datetime.datetime.strptime(request.query_params.get(
-            'end_time'), "%Y-%m-%d %H:%M:%S") if request.query_params.get('end_time') else experiment.end_time
+            if begin_time < experiment.begin_time or end_time > experiment.end_time:
+                response_dict['code'] = 403
+                response_dict['message'] = 'Access prohibited for this datetime'
+                return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
 
-        if begin_time < experiment.begin_time or end_time > experiment.end_time:
-            response_dict['code'] = 403
-            response_dict['message'] = 'Access prohibited for this datetime'
-            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+            data_all = sensor.data.filter(
+                measured_time__range=(begin_time, end_time))
+            datas = data_all[::step]
+            sensorSerializer = self.get_serializer(sensor)
+            page_list = self.paginate_queryset(datas)
+            serializer = DataSerializer(page_list, many=True)
+            response_dict['message'] = 'Success'
+            data_dict = {'list': serializer.data, 'pagination': {}}
+            data_dict.update(sensorSerializer.data)
+            data_dict['pagination']['current_page'] = self.paginator.page.number
+            data_dict['pagination']['num_pages'] = self.paginator.page.paginator.num_pages
+            data_dict['pagination']['per_page'] = self.paginator.page.paginator.per_page
+            data_dict['pagination']['total_size'] = len(datas)
+            response_dict['data'] = data_dict
+            return Response(data=response_dict, status=status.HTTP_200_OK)
 
-        data_all = sensor.data.filter(
-            measured_time__range=(begin_time, end_time))
-        datas = data_all[::step]
-        sensorSerializer = self.get_serializer(sensor)
-        page_list = self.paginate_queryset(datas)
-        serializer = DataSerializer(page_list, many=True)
-        response_dict['message'] = 'Success'
-        data_dict = {'list': serializer.data, 'pagination': {}}
-        data_dict.update(sensorSerializer.data)
-        data_dict['pagination']['current_page'] = self.paginator.page.number
-        data_dict['pagination']['num_pages'] = self.paginator.page.paginator.num_pages
-        data_dict['pagination']['per_page'] = self.paginator.page.paginator.per_page
-        data_dict['pagination']['total_size'] = len(datas)
-        response_dict['data'] = data_dict
-        return Response(data=response_dict, status=status.HTTP_200_OK)
+        response_dict['code'] = 403
+        response_dict['message'] = 'Access prohibited for this user'
+        return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
