@@ -1,10 +1,11 @@
 import datetime
 import hashlib
+import json
 import random
-from sensor.models import Sensor
 import time
 
 from compostlab.utils.pagination import RecordPagination
+from compostlab.utils.mqtt import Mqtt
 from equipment.models import Equipment
 from equipment.serializers import EquipmentDetailSerializer, EquipmentSerializer, EquipmentRecordSerializer
 from experiment.models import Experiment
@@ -213,7 +214,7 @@ class EquipmentViewSet(GenericViewSet):
             response_dict['code'] = 403
             response_dict['message'] = 'Access prohibited because the exquipment is not in this experiment'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
-        if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
+        if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request. user.is_staff:
             if experiment.status == 1:
                 if experiment.end_time < datetime.datetime.now():
                     experiment.status = 2
@@ -248,6 +249,51 @@ class EquipmentViewSet(GenericViewSet):
 
             response_dict['message'] = 'Success'
             response_dict['data'] = data
+            return Response(data=response_dict, status=status.HTTP_200_OK)
+
+        response_dict['code'] = 403
+        response_dict['message'] = 'Access prohibited for this user'
+        return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+
+    @ action(methods=['post'], detail=True, url_path='cmd', permission_classes=[IsAuthenticated])
+    def public_cmd(self, request, version, pk, format=None):
+        '''
+        public cmd to this equipment.
+        Example:
+            experiment:4    //所属实验
+            cmd:reset
+            heater:on
+        Return:
+
+        '''
+
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        equipment = self.get_object()
+        data = request.data.copy()
+        try:
+            experiment_id = data.pop('experiment')
+            experiment = Experiment.objects.get(pk=experiment_id)
+        except:
+            response_dict['code'] = 400
+            response_dict['message'] = 'Error experiment'
+            return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
+        if experiment.status <= 0:
+            response_dict['code'] = 403
+            response_dict['message'] = 'Access prohibited due to status of this experiment'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+        if equipment not in experiment.equipment.all():
+            response_dict['code'] = 403
+            response_dict['message'] = 'Access prohibited because the exquipment is not in this experiment'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+        if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
+            if experiment.status == 1:
+                if experiment.end_time < datetime.datetime.now():
+                    experiment.status = 2
+            equipmentKey = equipment.key
+            mqtt = Mqtt()
+            mqtt.public_message(equipmentKey, json.dumps(data))
+            response_dict['message'] = 'Success'
+            # response_dict['data'] = data
             return Response(data=response_dict, status=status.HTTP_200_OK)
 
         response_dict['code'] = 403

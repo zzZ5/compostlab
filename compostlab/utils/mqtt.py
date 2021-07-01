@@ -43,7 +43,6 @@ class Mqtt():
         if len(temp) < 2:
             return
         key = temp[1]
-        print(key)
         data = json.loads(msg.payload)
         if(len(key) == 10):
             print(key)
@@ -55,7 +54,6 @@ class Mqtt():
                 serializer.save()
 
     def public_message(self, equipmentKey, msg, qos=0):
-        # format cmd|order
-        # example cmd|restart or heater|on/off
+        # format {"cmd": "order"}
         self.client.publish(
             topic="topic/{}".format(equipmentKey), payload=msg, qos=qos)
