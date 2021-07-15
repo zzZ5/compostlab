@@ -3,7 +3,7 @@ from data.models import Data
 
 
 class DataAdmin(admin.ModelAdmin):
-    list_display = ('sensor', 'value', 'measured_time', 'created_time')
+    list_display = ('value', 'measured_time', 'created_time')
     list_filter = ['sensor', 'measured_time', 'created_time']
     fieldsets = [
         ('sensor', {'fields': ['sensor']}),
@@ -11,6 +11,7 @@ class DataAdmin(admin.ModelAdmin):
         ('time', {'fields': ['measured_time', 'created_time']}),
     ]
     readonly_fields = ['measured_time', 'created_time']
+    date_hierarchy = 'measured_time'
 
 
 admin.site.register(Data, DataAdmin)
