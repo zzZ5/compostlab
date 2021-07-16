@@ -1,6 +1,11 @@
 import datetime
+import json
+
 
 from compostlab.utils.pagination import RecordPagination
+from compostlab.utils.mqtt import Mqtt
+
+from equipment.models import Equipment
 from experiment.models import Experiment
 from experiment.serializers import ExperimentDetailSerializer, ExperimentSerializer, ReviewSerializer
 
@@ -212,3 +217,53 @@ class ExperimentViewSet(GenericViewSet):
         response_dict['code'] = 422
         response_dict['message'] = serializer.errors
         return Response(data=response_dict, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    @ action(methods=['post'], detail=True, url_path='cmd', permission_classes=[IsAuthenticated])
+    def public_cmd(self, request, version, pk, format=None):
+        '''
+        public cmd to equipment.
+        Example:
+            equipment:[1]
+            cmd:reset
+            heater:on
+        Return:
+
+        '''
+
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        experiment = self.get_object()
+        equipments = []
+        data = request.data.copy()
+        try:
+            equipment_id = data.pop('equipment')
+            for i in equipment_id:
+                equipments.append(Equipment.objects.get(id=i))
+        except:
+            response_dict['code'] = 400
+            response_dict['message'] = 'Error equipment'
+            return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
+        if experiment.status <= 0:
+            response_dict['code'] = 403
+            response_dict['message'] = 'Access prohibited due to status of this experiment'
+            return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+
+        if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
+            if experiment.status == 1:
+                if experiment.end_time < datetime.datetime.now():
+                    experiment.status = 2
+
+            mqtt = Mqtt()
+            for equipment in equipments:
+                if equipment not in experiment.equipment.all():
+                    response_dict['code'] = 403
+                    response_dict['message'] = 'Access prohibited because the exquipment is not in this experiment'
+                    return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+                equipmentKey = equipment.key
+                mqtt.public_message(equipmentKey, json.dumps(data))
+
+            response_dict['message'] = 'Success'
+            return Response(data=response_dict, status=status.HTTP_200_OK)
+
+        response_dict['code'] = 403
+        response_dict['message'] = 'Access prohibited for this user'
+        return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
