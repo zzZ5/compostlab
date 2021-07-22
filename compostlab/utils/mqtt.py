@@ -56,9 +56,9 @@ class Mqtt():
 
     def do_cmd(self, equipment_key, method, path, data):
 
-        equipment = Equipment.objects.filter(key=equipment_key)
-        if len(equipment) == 1:
-            equipment = equipment[0]
+        # equipment = Equipment.objects.filter(key=equipment_key)
+        # if len(equipment) == 1:
+        #     equipment = equipment[0]
 
         if method == 'post':
             if path == 'data':
