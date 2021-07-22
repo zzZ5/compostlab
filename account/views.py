@@ -98,7 +98,7 @@ class UserViewSet(GenericViewSet):
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['put'], detail=False, url_path='update')
-    def update(self, request, version, format=None):
+    def put(self, request, version, format=None):
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         serializer = UserDetailSerializer(request.user)
         if request.data['username'] != request.user.username and self.get_queryset().filter(username=request.data['username']):

@@ -141,7 +141,7 @@ class ExperimentViewSet(GenericViewSet):
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
 
     @ action(methods=['put'], detail=True, url_path='update', permission_classes=[IsAuthenticated])
-    def update(self, request, version, pk, format=None):
+    def put(self, request, version, pk, format=None):
         '''
         Update experiment's information.
         Example:
