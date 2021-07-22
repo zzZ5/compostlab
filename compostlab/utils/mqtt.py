@@ -57,7 +57,7 @@ class Mqtt():
             topic="compostlab/{}/response".format(equipmentKey), payload=msg, qos=qos)
 
 
-def do_cmd(self, equipment_key, method, path, data):
+def do_cmd(equipment_key, method, path, data):
 
     # equipment = Equipment.objects.filter(key=equipment_key)
     # if len(equipment) == 1:
