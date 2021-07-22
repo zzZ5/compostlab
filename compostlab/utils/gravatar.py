@@ -193,7 +193,6 @@ class GravatarXMLRPC(object):
             return getattr(self._server, "grav." + method, None)(args)
         except Fault as error:
             error_msg = "Server error: {1} (error code: {0})"
-            print(error_msg.format(error.faultCode, error.faultString))
 
 
 def sanitize_email(email):

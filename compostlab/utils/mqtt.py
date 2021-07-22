@@ -32,8 +32,6 @@ class Mqtt():
 
     def on_connect(self, client, userdata, flags, rc):
         # The callback for when the client receives a CONNACK response from the server.
-
-        print("Connected with result code "+str(rc))
         # Subscribing in on_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
         client.subscribe("compostlab/#")
@@ -42,7 +40,6 @@ class Mqtt():
         # The callback for when a PUBLISH message is received from the server.
         topic = msg.topic.split('/')
         if len(topic) < 4:
-            print(topic)
             return
         if topic[0] != 'compostlab':
             return
@@ -54,7 +51,6 @@ class Mqtt():
         self.do_cmd(equipment_key, method, path, data)
 
     def public_message(self, equipmentKey, msg, qos=0):
-        print(equipmentKey, msg)
         self.client.publish(
             topic="compostlab/{}/response".format(equipmentKey), payload=msg, qos=qos)
 
