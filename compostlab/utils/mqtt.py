@@ -1,4 +1,5 @@
 import json
+from threading import Thread
 
 from data.serializers import DataSerializer
 from equipment.models import Equipment
@@ -47,28 +48,30 @@ class Mqtt():
         method = topic[2]
         path = topic[3]
         data = json.loads(msg.payload)
-
-        self.do_cmd(equipment_key, method, path, data)
+        thread_do_cmd = Thread(target=do_cmd, args=(
+            equipment_key, method, path, data))
+        thread_do_cmd.start()
 
     def public_message(self, equipmentKey, msg, qos=0):
         self.client.publish(
             topic="compostlab/{}/response".format(equipmentKey), payload=msg, qos=qos)
 
-    def do_cmd(self, equipment_key, method, path, data):
 
-        # equipment = Equipment.objects.filter(key=equipment_key)
-        # if len(equipment) == 1:
-        #     equipment = equipment[0]
+def do_cmd(self, equipment_key, method, path, data):
 
-        if method == 'post':
-            if path == 'data':
-                if 'data' in data:
-                    serializer = DataSerializer(
-                        data=data['data'], many=True)
-                else:
-                    serializer = DataSerializer(data=data)
-            if serializer.is_valid():
-                # Successfully created
-                serializer.save()
-        else:
-            return
+    # equipment = Equipment.objects.filter(key=equipment_key)
+    # if len(equipment) == 1:
+    #     equipment = equipment[0]
+
+    if method == 'post':
+        if path == 'data':
+            if 'data' in data:
+                serializer = DataSerializer(
+                    data=data['data'], many=True)
+            else:
+                serializer = DataSerializer(data=data)
+        if serializer.is_valid():
+            # Successfully created
+            serializer.save()
+    else:
+        return
