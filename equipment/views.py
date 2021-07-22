@@ -161,7 +161,7 @@ class EquipmentViewSet(GenericViewSet):
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
     @ action(methods=['put'], detail=True, url_path='update', permission_classes=[IsAdminUser])
-    def put(self, request, version, pk, format=None):
+    def update(self, request, version, pk, format=None):
         '''
         Update equpment's information.
         Example:

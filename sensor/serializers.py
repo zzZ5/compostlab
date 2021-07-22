@@ -47,10 +47,13 @@ class SensorSerializer(serializers.ModelSerializer):
         return res
 
     def update(self, instance, validated_data, modifier):
-        equipment_data = validated_data.pop('equipment')
-        equipment = get_equipment(id=equipment_data)
-        if save_sensor_record('equipment', instance.equipment, equipment, modifier, instance):
-            instance.equipment = equipment
+        try:
+            equipment_data = validated_data.pop('equipment')
+            equipment = get_equipment(id=equipment_data)
+            if save_sensor_record('equipment', instance.equipment, equipment, modifier, instance):
+                instance.equipment = equipment
+        except:
+            pass
 
         name = validated_data.get('name', instance.name)
         if save_sensor_record('name', instance.name, name, modifier, instance):
