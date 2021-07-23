@@ -47,7 +47,6 @@ class Mqtt():
         method = topic[2]
         path = topic[3]
         data = json.loads(msg.payload)
-        print(data)
         thread_do_cmd = Thread(target=do_cmd, args=(
             equipment_key, method, path, data))
         thread_do_cmd.start()
