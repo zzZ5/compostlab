@@ -1,4 +1,5 @@
 import json
+from threading import Thread
 
 from data.serializers import DataSerializer
 from django.http import HttpResponse
@@ -47,7 +48,9 @@ class Mqtt():
         path = topic[3]
         data = json.loads(msg.payload)
         # print(data)
-        do_cmd(equipment_key, method, path, data)
+        thread_do_cmd = Thread(target=do_cmd, args=(
+            equipment_key, method, path, data))
+        thread_do_cmd.start()
 
 
 def do_cmd(equipment_key, method, path, data):
