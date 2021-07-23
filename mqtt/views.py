@@ -1,5 +1,4 @@
 import json
-from threading import Thread
 
 from data.serializers import DataSerializer
 from django.http import HttpResponse
@@ -23,7 +22,7 @@ class Singleton():
 @Singleton
 class Mqtt():
     def __init__(self):
-        self.client = mqtt.Client(client_id='zzZ5', clean_session=True)
+        self.client = mqtt.Client(client_id='zzZ5', clean_session=False)
         self.client.username_pw_set(username='admin', password='L05b03j..')
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
@@ -48,9 +47,7 @@ class Mqtt():
         path = topic[3]
         data = json.loads(msg.payload)
         # print(data)
-        thread_do_cmd = Thread(target=do_cmd, args=(
-            equipment_key, method, path, data))
-        thread_do_cmd.start()
+        do_cmd(equipment_key, method, path, data)
 
 
 def do_cmd(equipment_key, method, path, data):
