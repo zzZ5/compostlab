@@ -23,7 +23,7 @@ class Singleton():
 @Singleton
 class Mqtt():
     def __init__(self):
-        self.client = mqtt.Client(client_id='zzZ5', clean_session=False)
+        self.client = mqtt.Client(client_id='zzZ5', clean_session=True)
         self.client.username_pw_set(username='admin', password='L05b03j..')
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
@@ -47,6 +47,7 @@ class Mqtt():
         method = topic[2]
         path = topic[3]
         data = json.loads(msg.payload)
+        # print(data)
         thread_do_cmd = Thread(target=do_cmd, args=(
             equipment_key, method, path, data))
         thread_do_cmd.start()
