@@ -37,7 +37,6 @@ def on_message(client, userdata, msg):
     method = topic[2]
     path = topic[3]
     data = json.loads(msg.payload)
-    print(data)
     thread_do_cmd = Thread(target=do_cmd, args=(
         equipment_key, method, path, data))
     thread_do_cmd.start()
@@ -79,5 +78,4 @@ def mqtt_run():
     client.connect("118.25.108.254", 1883, 60)
     client.loop_start()
     client.reconnect_delay_set(min_delay=1, max_delay=2000)
-    print('start')
     mqttfunction()
