@@ -8,10 +8,11 @@ https://docs.djangoproject.com/en/3.0/howto/deployment/wsgi/
 """
 
 import os
-from compostlab.utils.mqtt import Mqtt
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'compostlab.settings')
 
 application = get_wsgi_application()
+
+from compostlab.utils.mqtt import Mqtt
 mqtt = Mqtt()
