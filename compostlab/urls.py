@@ -27,7 +27,5 @@ urlpatterns = [
     path('api/<version>/data/', include('data.urls')),
     path('api/<version>/equipment/', include('equipment.urls')),
     path('api/<version>/experiment/', include('experiment.urls')),
-    path('api/<version>/sensor/', include('sensor.urls')),
-    path('mqtt/', include('mqtt.urls')),
-
+    path('api/<version>/sensor/', include('sensor.urls'))
 ]
