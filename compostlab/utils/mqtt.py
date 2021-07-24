@@ -3,6 +3,7 @@ import json
 import os
 from threading import Thread
 
+from background_task import background
 from data.serializers import DataSerializer
 
 import paho.mqtt.client as mqtt
@@ -64,12 +65,13 @@ def mqttfunction():
     # 使用loop_start 可以避免阻塞Django进程，使用loop_forever()可能会阻塞系统进程
     # client.loop_start()
     # client.loop_forever() 有掉线重连功能
-    client.loop_forever(retry_first_connection=True)
+    client.loop_forever()
 
 
 client = mqtt.Client(client_id='zzZ5', clean_session=False)
 
 
+@background(schedule=10)
 def mqtt_run():
     client.username_pw_set(username='admin', password='L05b03j..')
     client.on_connect = on_connect
@@ -77,6 +79,5 @@ def mqtt_run():
     client.connect("118.25.108.254", 1883, 60)
     client.loop_start()
     client.reconnect_delay_set(min_delay=1, max_delay=2000)
-    # 启动
-    mqttthread = Thread(target=mqttfunction)
-    mqttthread.start()
+    print('start')
+    mqttfunction()
