@@ -3,7 +3,7 @@ import json
 
 
 from compostlab.utils.pagination import RecordPagination
-from compostlab.utils.mqtt import Mqtt
+from compostlab.utils import mqtt
 
 from equipment.models import Equipment
 from experiment.models import Experiment
@@ -252,7 +252,6 @@ class ExperimentViewSet(GenericViewSet):
                 if experiment.end_time < datetime.datetime.now():
                     experiment.status = 2
 
-            mqtt = Mqtt()
             for equipment in equipments:
                 if equipment not in experiment.equipment.all():
                     response_dict['code'] = 403
