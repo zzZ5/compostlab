@@ -13,31 +13,19 @@ os.environ.setdefault('DJANGO_SETTING_MODULE', 'compostlab.settings')
 django.setup()
 
 
-client = mqtt.Client(client_id='zzZ5', clean_session=False)
-
-
-# mqtt客户端启动函数
-def mqttfunction():
-    global client
-    # 使用loop_start 可以避免阻塞Django进程，使用loop_forever()可能会阻塞系统进程
-    # client.loop_start()
-    # client.loop_forever() 有掉线重连功能
-    client.loop_forever(retry_first_connection=True)
-
-
-def public_message(self, equipmentKey, msg, qos=0):
-    self.client.publish(
+def public_message(equipmentKey, msg, qos=0):
+    client.publish(
         topic="compostlab/{}/response".format(equipmentKey), payload=msg, qos=qos)
 
 
-def on_connect(self, client, userdata, flags, rc):
+def on_connect(client, userdata, flags, rc):
     # The callback for when the client receives a CONNACK response from the server.
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
     client.subscribe("compostlab/#")
 
 
-def on_message(self, client, userdata, msg):
+def on_message(client, userdata, msg):
     # The callback for when a PUBLISH message is received from the server.
     topic = msg.topic.split('/')
     if len(topic) < 4:
@@ -48,7 +36,7 @@ def on_message(self, client, userdata, msg):
     method = topic[2]
     path = topic[3]
     data = json.loads(msg.payload)
-    # print(data)
+    print(data)
     thread_do_cmd = Thread(target=do_cmd, args=(
         equipment_key, method, path, data))
     thread_do_cmd.start()
@@ -68,6 +56,18 @@ def do_cmd(equipment_key, method, path, data):
             serializer.save()
     else:
         return
+
+
+# mqtt客户端启动函数
+def mqttfunction():
+    global client
+    # 使用loop_start 可以避免阻塞Django进程，使用loop_forever()可能会阻塞系统进程
+    # client.loop_start()
+    # client.loop_forever() 有掉线重连功能
+    client.loop_forever(retry_first_connection=True)
+
+
+client = mqtt.Client(client_id='zzZ5', clean_session=False)
 
 
 def mqtt_run():
