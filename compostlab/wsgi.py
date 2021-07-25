@@ -13,6 +13,3 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'compostlab.settings')
 
 application = get_wsgi_application()
-
-from compostlab.utils import mqtt
-mqtt.mqtt_run(verbose_name="mqtt")
