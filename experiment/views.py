@@ -3,7 +3,7 @@ import json
 
 
 from compostlab.utils.pagination import RecordPagination
-from compostlab.utils import mqtt
+from compostlab.utils.mqtt import Mqtt
 
 from equipment.models import Equipment
 from experiment.models import Experiment
@@ -258,6 +258,7 @@ class ExperimentViewSet(GenericViewSet):
                     response_dict['message'] = 'Access prohibited because the exquipment is not in this experiment'
                     return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
                 equipmentKey = equipment.key
+                mqtt = Mqtt()
                 mqtt.public_message(equipmentKey, json.dumps(data))
 
             response_dict['message'] = 'Success'

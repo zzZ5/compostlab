@@ -5,7 +5,7 @@ import random
 import time
 
 from compostlab.utils.pagination import RecordPagination
-from compostlab.utils import mqtt
+from compostlab.utils.mqtt import Mqtt
 from equipment.models import Equipment
 from equipment.serializers import EquipmentDetailSerializer, EquipmentSerializer, EquipmentRecordSerializer
 from experiment.models import Experiment
@@ -290,6 +290,7 @@ class EquipmentViewSet(GenericViewSet):
                 if experiment.end_time < datetime.datetime.now():
                     experiment.status = 2
             equipmentKey = equipment.key
+            mqtt = Mqtt()
             mqtt.public_message(equipmentKey, json.dumps(data))
             response_dict['message'] = 'Success'
             # response_dict['data'] = data
