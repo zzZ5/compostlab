@@ -53,13 +53,15 @@ class EquipmentDetailSerializer(serializers.ModelSerializer):
         depth = 1
 
     def update(self, instance, validated_data, modifier):
-        sensor_data = validated_data.pop('sensor')
-        sensors = []
-        for i in sensor_data:
-            sensors.append(get_sensor(id=i))
-        if save_equipment_record('sensor', list(instance.sensor.all()), sensors, modifier, instance):
-            instance.sensor.set(sensors)
-
+        try:
+            sensor_data = validated_data.pop('sensor')
+            sensors = []
+            for i in sensor_data:
+                sensors.append(get_sensor(id=i))
+            if save_equipment_record('sensor', list(instance.sensor.all()), sensors, modifier, instance):
+                instance.sensor.set(sensors)
+        except:
+            pass
         name = validated_data.get('name', instance.name)
         if save_equipment_record('name', instance.name, name, modifier, instance):
             instance.name = name
