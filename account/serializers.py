@@ -6,6 +6,19 @@ from compostlab.utils.gravatar import Gravatar
 
 
 def save_user_record(name, old, new, user):
+    '''
+    保存用户修改记录
+
+    Parameter:
+        name:
+        old:
+        new:
+        user:
+
+    Return:
+
+    '''
+
     if old != new:
         record = 'Changed the "{}" from "{}" to "{}"'.format(
             name, old, new)

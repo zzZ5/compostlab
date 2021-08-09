@@ -3,6 +3,14 @@ from django.db import models
 
 
 class UserRecord(models.Model):
+    '''
+    用户修改记录表。
+
+    其中：
+        user： 修改人；
+        record：具体的修改内容；
+        created_time： 修改时间。
+    '''
 
     record = models.CharField(max_length=256, blank=True)
     user = models.ForeignKey(
