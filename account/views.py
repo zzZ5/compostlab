@@ -13,10 +13,20 @@ from rest_framework.viewsets import GenericViewSet
 
 
 class UserViewSet(GenericViewSet):
+    '''
+    提供用户表相关接口。
+    '''
+
+    # 默认查询用户表
     queryset = User.objects.all()
+    # 默认序列化类为用户序列化类
     serializer_class = UserSerializer
+    # 默认需要已认证权限
     permission_classes = (IsAuthenticated,)
+    # 默认的分页类为记录分页
     pagination_class = RecordPagination
+
+    # 设置默认的筛选、排序、搜索标的。
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
                        filters.OrderingFilter, filters.SearchFilter,)
     filter_fields = ('id', 'username', 'email', 'is_active',
@@ -27,16 +37,20 @@ class UserViewSet(GenericViewSet):
     @ action(methods=['post'], detail=False, url_path='register', permission_classes=[IsAdminUser])
     def create_user(self, request, version, format=None):
         '''
-        Create a new account through post.
+        通过post方法新建一个账户。
+
         Example:
-            "username": "test1"
-            "email": "test1@example.com"
-            "password": "test123"
-            "is_active": "true"
-            "is_staff": "false"
-            "is_superuser": "false"
+            POST 127.0.0.1:8000/api/1.0/account/register/
+            {
+                "username": "test1"
+                "email": "test1@example.com"
+                "password": "test123"
+                "is_active": "true"
+                "is_staff": "false"
+                "is_superuser": "false"
+            }
         Return:
-            if success, return user's profile.
+            如果新建成功，则返回账号信息。
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
@@ -54,6 +68,14 @@ class UserViewSet(GenericViewSet):
 
     @ action(methods=['get'], detail=False, url_path='mine')
     def get_myself(self, request, version, format=None):
+        '''
+        通过get方法获取当前已登陆账户的信息。
+        Example:
+            GET 127.0.0.1:8000/api/1.0/account/mine/
+        Return:
+            如果成功，则返回当前已登陆账号信息。
+        '''
+
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         user = request.user
         serializer = UserDetailSerializer(user)
@@ -63,6 +85,14 @@ class UserViewSet(GenericViewSet):
 
     @ action(methods=['get'], detail=True, url_path='detail')
     def get(self, request, version, pk, format=None):
+        '''
+        通过get方法和账户的id获取账户的信息，需要提供账户id。
+        Example:
+            GET 127.0.0.1:8000/api/1.0/account/mine/
+        Return:
+            如果成功，则返回当前已登陆账号信息。
+        '''
+
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         user = self.get_object()
         serializer = UserDetailSerializer(user)
@@ -70,35 +100,16 @@ class UserViewSet(GenericViewSet):
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
-    @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAuthenticated])
-    def get_list(self, request, version, format=None):
-        '''
-        Show all equipments through get.
-        Example:
-            GET 127.0.0.1:8000/api/1.0/equipment/list/?page=1&size=5
-        Return:
-            All equipments's information.
-        '''
-        response_dict = {'code': 200, 'message': 'ok', 'data': []}
-        queryset = self.get_queryset()
-        equipments = self.filter_queryset(queryset)
-        page_list = self.paginate_queryset(equipments)
-
-        serializer = self.get_serializer(page_list, many=True)
-
-        response_dict['code'] = 200
-        response_dict['message'] = 'Success'
-        data_dict = {'list': serializer.data, 'pagination': {}}
-        data_dict['pagination']['current_page'] = self.paginator.page.number
-        data_dict['pagination']['num_pages'] = self.paginator.page.paginator.num_pages
-        data_dict['pagination']['per_page'] = self.paginator.page.paginator.per_page
-        data_dict['pagination']['total_size'] = len(equipments)
-        response_dict['data'] = data_dict
-
-        return Response(data=response_dict, status=status.HTTP_200_OK)
-
     @ action(methods=['put'], detail=False, url_path='update')
     def put(self, request, version, format=None):
+        '''
+        通过get方法和账户的id获取账户的信息，需要提供账户id。
+        Example:
+            GET 127.0.0.1:8000/api/1.0/account/mine/
+        Return:
+            如果成功，则返回当前已登陆账号信息。
+        '''
+
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         serializer = UserDetailSerializer(request.user)
         if request.data['username'] != request.user.username and self.get_queryset().filter(username=request.data['username']):
