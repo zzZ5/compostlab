@@ -10,6 +10,20 @@ from rest_framework import serializers
 
 
 def save_experiment_record(name, old, new, modifier, experiment):
+    '''
+    保存实验修改记录.
+
+    Args:
+        name: 修改的属性名称。
+        old: 修改前的内容。
+        new: 修改后的内容。
+        modifier: 修改人。
+        experiment: 要修改的实验。
+
+    Return:
+        Bool: True已保存记录, False修改后和修改前相同，未保存记录。
+    '''
+
     if old != new:
         record = 'Changed the "{}" from "{}" to "{}"'.format(
             name, old, new)
@@ -21,8 +35,14 @@ def save_experiment_record(name, old, new, modifier, experiment):
 
 
 class ExperimentDetailSerializer(serializers.ModelSerializer):
+    '''
+    序列化实验信息。
+
+    将实验详细信息序列化，包括设备，主要用于实验的创建和修改。
+    '''
 
     def update(self, instance, validated_data, modifier):
+        # 更新实验信息时调用该方法，每个属性只要有改变都会记录下来。
 
         user_data = validated_data.pop('user')
         users = []
@@ -86,6 +106,11 @@ class ExperimentDetailSerializer(serializers.ModelSerializer):
 
 
 class ExperimentSerializer(serializers.ModelSerializer):
+    '''
+    序列化实验信息。
+
+    将实验信息序列化，但不包括设备，主要用于传输信息到前端。
+    '''
 
     user = RelatedFieldAlternative(
         queryset=User.objects.all(), serializer=UserSerializer, required=False, many=True)
@@ -100,6 +125,9 @@ class ExperimentSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    '''
+    序列化实验审核信息。
+    '''
 
     def create(self, validated_data):
         review = Review(**validated_data)

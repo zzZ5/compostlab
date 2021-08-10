@@ -23,14 +23,14 @@ from rest_framework.viewsets import GenericViewSet
 
 def get_random_secret_key(length=10, allowed_chars=None, secret_key=None):
     '''
-    Generate random string.
+    创建一串随机字符串。
 
-    Parameter:
-        length(int): the length of this string.
-        allowed_chars(string): the range chars of this string.
-        secret_key(string): random seed.
+    Args:
+        length(int): 随机字符串长度。
+        allowed_chars(string): 随机字符串的范围。
+        secret_key(string): 随机字符串种子。
     Return:
-        string: random string.
+        string: 随机字符串。.
     '''
 
     if allowed_chars is None:
@@ -50,10 +50,20 @@ def get_random_secret_key(length=10, allowed_chars=None, secret_key=None):
 
 
 class EquipmentViewSet(GenericViewSet):
+    '''
+    提供设备表相关接口。
+    '''
+
+    # 默认查询设备表
     queryset = Equipment.objects.all()
+    # 默认序列化类为设备序列化类
     serializer_class = EquipmentSerializer
+    # 默认需要已认证权限
     permission_classes = (IsAuthenticated,)
+    # 默认的分页类为记录分页
     pagination_class = RecordPagination
+
+    # 设置默认的筛选、排序、搜索标的。
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
                        filters.OrderingFilter, filters.SearchFilter,)
     filter_fields = ('id', 'name', 'abbreviation', 'type',
@@ -65,16 +75,24 @@ class EquipmentViewSet(GenericViewSet):
     @ action(methods=['post'], detail=False, url_path='create', permission_classes=[IsAdminUser])
     def create_equipment(self, request, version, format=None):
         '''
-        Create a new Equipment through post.
+        通过post方法新建一个设备。
+
         Example:
-            "name": "test1"
-            "abbreviation": "t1"
-            "type": "RE"
-            "descript": "this is a test equipment."
+            POST 127.0.0.1:8000/api/1.0/equipment/create/
+            {
+                "name": "test1",
+                "name_brief": "t1",
+                "type": "RE",
+                "descript": "this is a test equipment.",
+                "sensor": [
+                    1
+                ]
+            }
         Return:
-            if success, return equipment's information.
+            如果成功，返回该设备的信息。
         '''
 
+        # 获取一个不重复的随机key。
         key = get_random_secret_key()
         while Equipment.objects.filter(key=key):
             key = get_random_secret_key()
@@ -96,6 +114,16 @@ class EquipmentViewSet(GenericViewSet):
 
     @ action(methods=['get'], detail=True, url_path='detail', permission_classes=[IsAuthenticated])
     def get(self, request, version, pk, format=None):
+        '''
+        通过get方法和设备的id获取设备的信息，需要提供设备id。
+
+        Example:
+            GET 127.0.0.1:8000/api/1.0/equipment/1/detail/
+
+        Return:
+            如果成功，则返回设备信息。
+        '''
+
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         equipment = self.get_object()
         serializer = EquipmentDetailSerializer(equipment)
@@ -106,12 +134,15 @@ class EquipmentViewSet(GenericViewSet):
     @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAuthenticated])
     def get_list(self, request, version, format=None):
         '''
-        Show all equipments through get.
+        通过get方法获取所有设备的信息（分页获取）。
+
         Example:
-            GET 127.0.0.1:8000/api/1.0/equipment/list/?page=1&size=5
+            GET 127.0.0.1:8000/api/1.0/equipment/list/?page=1&size=5&ordering=-id
+
         Return:
-            All equipments's information.
+            所有设备信息。
         '''
+
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         queryset = self.get_queryset()
         equipments = self.filter_queryset(queryset)
@@ -133,11 +164,13 @@ class EquipmentViewSet(GenericViewSet):
     @ action(methods=['get'], detail=True, url_path='record', permission_classes=[IsAuthenticated])
     def get_record(self, request, version, pk, format=None):
         '''
-        Show equipment's all Record through get.
+        通过get方法获取设备的所有修改记录（分页）。
+
         Example:
-            GET 127.0.0.1:8000/api/1.0/equipment/4/record/?page=1&size=3
+            GET 127.0.0.1:8000/api/1.0/equipment/4/record/?page=1&size=10
+
         Return:
-            All records of this equipments.
+            该设备的所有修改记录。
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
@@ -163,14 +196,20 @@ class EquipmentViewSet(GenericViewSet):
     @ action(methods=['put'], detail=True, url_path='update', permission_classes=[IsAdminUser])
     def put(self, request, version, pk, format=None):
         '''
-        Update equpment's information.
+        通过put方法更新设备信息。
+
         Example:
-                "name": "test1",
-                "abbreviation": "t123",
+            PUT 127.0.0.1:8000/api/1.0/equipment/4/update/
+            {
+                "name":"test1",
+                "name_brief": "t1",
                 "type": "RE",
-                "descript": "test1",
+                "descript": "test1-changed",
+                "sensor": []
+            }
+
         Return:
-            All equipments's information.
+            最新的设备信息。
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
@@ -190,15 +229,19 @@ class EquipmentViewSet(GenericViewSet):
     @ action(methods=['get'], detail=True, url_path='data', permission_classes=[IsAuthenticated])
     def get_data(self, request, version, pk, format=None):
         '''
-        Get data of this sensor(important).
+        获取设备内部传感器的所有数据信息.
+
         Example:
-            experiment:4    //所属实验
-            step:2  //步长
-            begin_time:2021-04-23 13:00:35  //开始时间
-            end_time:2021-04-24 16:35:36    //结束时间
-            count:3 //数据量，和步长冲突时优先数据量
+            GET 127.0.0.1:8000/api/1.0/equipment/4/data/
+
+            parameters:
+                experiment:4    //所属实验
+                step:2  //步长
+                begin_time:2021-04-23 13:00:35  //开始时间
+                end_time:2021-04-24 16:35:36    //结束时间
+                count:100 //数据量(可选)，和步长冲突时优先数据量
         Return:
-            Datas
+            该设备的属于这个实验的全部数据。
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
@@ -206,14 +249,20 @@ class EquipmentViewSet(GenericViewSet):
 
         experiment_id = request.query_params.get('experiment')
         experiment = Experiment.objects.get(pk=experiment_id)
+
+        # 先判断实验是否正在进行或已完成
         if experiment.status <= 0:
             response_dict['code'] = 403
             response_dict['message'] = 'Access prohibited due to status of this experiment'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+
+        # 判断该设备是否在该实验中
         if equipment not in experiment.equipment.all():
             response_dict['code'] = 403
             response_dict['message'] = 'Access prohibited because the exquipment is not in this experiment'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+
+        # 判断该用户是否有权限查看
         if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request. user.is_staff:
             if experiment.status == 1:
                 if experiment.end_time < datetime.datetime.now():
@@ -258,13 +307,18 @@ class EquipmentViewSet(GenericViewSet):
     @ action(methods=['post'], detail=True, url_path='cmd', permission_classes=[IsAuthenticated])
     def public_cmd(self, request, version, pk, format=None):
         '''
-        public cmd to this equipment.
-        Example:
-            experiment:4    //所属实验
-            cmd:reset
-            heater:on
-        Return:
+        发送指令给设备。
 
+        Example:
+            POST 127.0.0.1:8000/api/1.0/equipment/4/cmd/
+            {
+                experiment: 4    //所属实验
+                cmd: reset
+                heater: on
+            }
+
+        Return:
+            成功与否。
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
@@ -277,24 +331,37 @@ class EquipmentViewSet(GenericViewSet):
             response_dict['code'] = 400
             response_dict['message'] = 'Error experiment'
             return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
+
+        # 先判断实验是否正在进行或已完成
         if experiment.status <= 0:
             response_dict['code'] = 403
             response_dict['message'] = 'Access prohibited due to status of this experiment'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+
+        # 判断该设备是否在该实验中
         if equipment not in experiment.equipment.all():
             response_dict['code'] = 403
             response_dict['message'] = 'Access prohibited because the exquipment is not in this experiment'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
+
+        # 判断该用户是否有权限查看
         if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
             if experiment.status == 1:
                 if experiment.end_time < datetime.datetime.now():
                     experiment.status = 2
             equipmentKey = equipment.key
+            # 创建一个Mqtt对象，该Mqtt对象为单例模式，只会存在一个对象。
             mqtt = Mqtt()
-            mqtt.public_message(equipmentKey, json.dumps(data))
-            response_dict['message'] = 'Success'
-            # response_dict['data'] = data
-            return Response(data=response_dict, status=status.HTTP_200_OK)
+            # 发送指令给设备
+            try:
+                mqtt.public_message(equipmentKey, json.dumps(data))
+                response_dict['message'] = 'Success'
+                # response_dict['data'] = data
+                return Response(data=response_dict, status=status.HTTP_200_OK)
+            except:
+                response_dict['message'] = 'Error'
+                response_dict['code'] = 404
+                return Response(data=response_dict, status=status.HTTP_404_NOT_FOUND)
 
         response_dict['code'] = 403
         response_dict['message'] = 'Access prohibited for this user'

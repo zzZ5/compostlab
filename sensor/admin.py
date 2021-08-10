@@ -3,6 +3,10 @@ from sensor.models import Sensor, SensorRecord
 
 
 class SensorAdmin(admin.ModelAdmin):
+    '''
+    django自带的管理员界面设置, 传感器表。
+    '''
+
     list_display = ('name', 'abbreviation', 'pk', 'key',
                     'type', 'unit', 'descript', 'equipment', 'created_time')
     list_filter = ['equipment', 'created_time']
@@ -16,6 +20,10 @@ class SensorAdmin(admin.ModelAdmin):
 
 
 class SensorRecordAdmin(admin.ModelAdmin):
+    '''
+    django自带的管理员界面设置, 传感器修改记录表。
+    '''
+
     list_display = ('sensor',  'record', 'modifier', 'created_time')
     list_filter = ['sensor', 'modifier', 'created_time']
     fieldsets = [

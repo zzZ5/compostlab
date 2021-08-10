@@ -9,6 +9,10 @@ from rest_framework.viewsets import GenericViewSet
 
 
 class DataViewSet(GenericViewSet):
+    '''
+    提供数据表相关接口。
+    '''
+
     queryset = Data.objects.all()
     serializer_class = DataSerializer
     permission_classes = (IsAuthenticated,)
@@ -16,15 +20,20 @@ class DataViewSet(GenericViewSet):
     @ action(methods=['post'], detail=False, url_path='upload', permission_classes=[AllowAny])
     def upload_data(self, request, version, format=None):
         '''
-        Create a new Data through post.
+        通过post新建一个数据.
+
         Example:
-            "value": "25.0"
-            "unit": "℃"
-            "key": "Sensor's key"
-            "measured_time": "2021-04-23 16:21:35"
+            {
+                "value": "25.0"
+                "unit": "℃"
+                "key": "Sensor's key"
+                "measured_time": "2021-04-23 16:21:35"
+            }
+
+        Return:
+            如果新建成功，返回数据信息。
         '''
 
-        # Every equipment have a unique key.
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
 
         if "data" in request.data:

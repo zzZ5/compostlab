@@ -7,6 +7,10 @@ from django.forms import ModelMultipleChoiceField, ModelForm
 
 
 class SensorAdminForm(ModelForm):
+    '''
+    放置于设备表中的传感器表
+    '''
+
     sensor = ModelMultipleChoiceField(
         queryset=Sensor.objects.all(),
         widget=FilteredSelectMultiple(verbose_name='sensor', is_stacked=False), required=False)
@@ -23,6 +27,10 @@ class SensorAdminForm(ModelForm):
 
 
 class EquipmentAdmin(admin.ModelAdmin):
+    '''
+    django自带的管理员界面设置, 设备表。
+    '''
+
     form = SensorAdminForm
     list_display = ('name', 'abbreviation', 'pk', 'key', 'type',
                     'descript', 'sensor_display', 'created_time')
@@ -35,6 +43,7 @@ class EquipmentAdmin(admin.ModelAdmin):
     ]
 
     def save_model(self, request, obj, form, change):
+        # 每次在管理界面对设备进行修改时调用该方法来保存对设备传感器的修改
         original_sensors = obj.sensor.all()
         new_sensors = form.cleaned_data['sensor']
         remove_qs = original_sensors.exclude(id__in=new_sensors.values('id'))
@@ -49,6 +58,10 @@ class EquipmentAdmin(admin.ModelAdmin):
 
 
 class EquipmentRecordAdmin(admin.ModelAdmin):
+    '''
+    django自带的管理员界面设置, 设备修改记录表。
+    '''
+
     list_display = ('equipment',  'record', 'modifier', 'created_time')
     list_filter = ['equipment', 'modifier', 'created_time']
     fieldsets = [

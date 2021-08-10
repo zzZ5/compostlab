@@ -5,6 +5,7 @@ class RecordPagination(PageNumberPagination):
     """
     Generate a custom definition pagination.
     """
+
     # url/?page=1&size=5
     page_query_param = 'page'
     page_size_query_param = 'size'

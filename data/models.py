@@ -6,6 +6,16 @@ from django.db import models
 
 
 class Data(models.Model):
+    '''
+    数据表。
+
+    Attributes：
+        sensor: 数据所属的传感器。
+        value(float): 数据值。
+        measured_time： 数据测量时间。
+        created_time: 创建时间。
+    '''
+
     sensor = models.ForeignKey(
         Sensor, null=True, on_delete=models.CASCADE, related_name='%(class)s')
     value = models.FloatField()

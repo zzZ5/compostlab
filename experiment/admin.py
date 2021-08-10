@@ -5,6 +5,9 @@ from django.contrib import admin
 
 
 class ExperimentModelForm(forms.ModelForm):
+    '''
+    将实验表内部的dscript的UI改为Textarea。
+    '''
     descript = forms.CharField(widget=forms.Textarea)
 
     class Meta:
@@ -13,6 +16,9 @@ class ExperimentModelForm(forms.ModelForm):
 
 
 class ExperimentAdmin(admin.ModelAdmin):
+    '''
+    django自带的管理员界面设置, 实验表。
+    '''
     form = ExperimentModelForm
     list_display = ('name', 'pk', 'site', 'descript', 'equipment_display', 'begin_time',
                     'end_time', 'owner', 'user_display', 'status', 'created_time')
@@ -33,6 +39,10 @@ class ExperimentAdmin(admin.ModelAdmin):
 
 
 class ReviewAdmin(admin.ModelAdmin):
+    '''
+    django自带的管理员界面设置, 实验审核表。
+    '''
+
     list_display = ('experiment', 'is_passed', 'reply', 'user', 'created_time')
     list_filter = ['created_time']
     readonly_fields = ['created_time']

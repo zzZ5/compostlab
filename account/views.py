@@ -49,6 +49,7 @@ class UserViewSet(GenericViewSet):
                 "is_staff": "false"
                 "is_superuser": "false"
             }
+
         Return:
             如果新建成功，则返回账号信息。
         '''
@@ -70,8 +71,10 @@ class UserViewSet(GenericViewSet):
     def get_myself(self, request, version, format=None):
         '''
         通过get方法获取当前已登陆账户的信息。
+
         Example:
             GET 127.0.0.1:8000/api/1.0/account/mine/
+
         Return:
             如果成功，则返回当前已登陆账号信息。
         '''
@@ -87,8 +90,10 @@ class UserViewSet(GenericViewSet):
     def get(self, request, version, pk, format=None):
         '''
         通过get方法和账户的id获取账户的信息，需要提供账户id。
+
         Example:
             GET 127.0.0.1:8000/api/1.0/account/mine/
+
         Return:
             如果成功，则返回当前已登陆账号信息。
         '''
@@ -103,11 +108,17 @@ class UserViewSet(GenericViewSet):
     @ action(methods=['put'], detail=False, url_path='update')
     def put(self, request, version, format=None):
         '''
-        通过get方法和账户的id获取账户的信息，需要提供账户id。
+        通过put方法修改已登陆账号信息。
+
         Example:
-            GET 127.0.0.1:8000/api/1.0/account/mine/
+            GET 127.0.0.1:8000/api/1.0/account/update/
+            {
+               "username": "test1",
+                "email": "test11111@example.com"
+            }
+
         Return:
-            如果成功，则返回当前已登陆账号信息。
+            如果成功，则返回当前已登陆账号最新信息。
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
@@ -124,7 +135,10 @@ class UserViewSet(GenericViewSet):
     @ action(methods=['get'], detail=False, url_path='logout')
     def log_out(self, request, version, format=None):
         '''
-        Logout user.
+        登出当前账号
+
+        Example:
+            GET 127.0.0.1:8000/api/1.0/account/logput/
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         logout(request)
@@ -134,7 +148,16 @@ class UserViewSet(GenericViewSet):
     @ action(methods=['post'], detail=False, url_path='changepassword')
     def change_password(self, request, version, format=None):
         '''
-        Change user's password.
+        通过post方法修改当前账号密码
+
+        Example:
+        {
+            "password": "123456";
+            "new_password": "12345"
+        }
+
+        Return:
+            如果成功，返回当前账号信息。
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
 
@@ -155,11 +178,13 @@ class UserViewSet(GenericViewSet):
     @ action(methods=['get'], detail=False, url_path='record')
     def get_record(self, request, version, format=None):
         '''
-        Show user's all record through get.
+        通过get方法获取当前账户的信息修改记录.
+
         Example:
-            GET 127.0.0.1:8000/api/1.0/account/4/record/?page=1&size=3
+            GET 127.0.0.1:8000/api/1.0/account/record/?page=1&size=10
+
         Return:
-            All records of this user.
+            这个账户所有的修改记录（分页获取）。
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}

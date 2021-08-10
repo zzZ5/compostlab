@@ -1,4 +1,6 @@
 # scripts/mqtt.py
+# 脚本文件，需要使用`python manage.py runscript mqtt`指令方可运行
+# 详情参见 https://django-extensions-zh.readthedocs.io/zh_CN/latest/runscript.html
 
 import json
 from threading import Thread
@@ -24,12 +26,12 @@ class Singleton():
 @Singleton
 class Mqtt():
     def __init__(self):
-        self.client = mqtt.Client(client_id='zzZ5',clean_session=False)
+        self.client = mqtt.Client(client_id='zzZ5', clean_session=False)
         self.client.username_pw_set(username='admin', password='L05b03j..')
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.connect("118.25.108.254", 1883, 60)
-    
+
     def start(self):
         self.client.loop_forever()
 
@@ -37,10 +39,19 @@ class Mqtt():
         # The callback for when the client receives a CONNACK response from the server.
         # Subscribing in on_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
+
+        # 监听 compostlab下的所有topic
         client.subscribe("compostlab/#")
 
     def on_message(self, client, userdata, msg):
         # The callback for when a PUBLISH message is received from the server.
+        '''
+        topic一般组成为 compostlab/{key}/{method}/{path}
+        其中 key: 设备key或者传感器key。
+            method： 和request的method类似。
+            path: 其他指令
+        '''
+
         topic = msg.topic.split('/')
         # print(topic)
         if len(topic) < 4:
@@ -52,6 +63,8 @@ class Mqtt():
         path = topic[3]
         data = json.loads(msg.payload)
         # print(data)
+
+        # 新建一个线程处理接受到的信息
         thread_do_cmd = Thread(target=do_cmd, args=(
             equipment_key, method, path, data))
         thread_do_cmd.start()
@@ -62,6 +75,7 @@ class Mqtt():
 
 
 def do_cmd(equipment_key, method, path, data):
+    # 处理接收到的信息。
 
     # equipment = Equipment.objects.filter(key=equipment_key)
     # if len(equipment) == 1:

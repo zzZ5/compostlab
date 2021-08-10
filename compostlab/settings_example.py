@@ -20,12 +20,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 ALLOWED_HOSTS = ['*']
 
 # 邮件配置
@@ -38,13 +35,24 @@ EMAIL_HOST_PASSWORD = ''
 # 注册有效期天数
 CONFIRM_DAYS = 7
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 跨域问题
+CORS_ORIGIN_ALLOW_ALL = True
+
 # Application definition
 
 INSTALLED_APPS = [
-    'simpleui',
-    'equipment.apps.EquipmentConfig',
     'account.apps.AccountConfig',
     'corsheaders',
+    'data.apps.DataConfig',
+    'django_extensions',
+    'django_filters',
+    'equipment.apps.EquipmentConfig',
+    'experiment.apps.ExperimentConfig',
+    'sensor.apps.SensorConfig',
+    'simpleui',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -60,16 +68,21 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'EXCEPTION_HANDLER': 'compostlab.utils.exception.custom_exception_handler',
+    'DATETIME_FORMAT': "%Y-%m-%d %H:%M:%S",
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
 }
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -84,7 +97,7 @@ ROOT_URLCONF = 'compostlab.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'frontend')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -99,7 +112,7 @@ TEMPLATES = [
 
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
-    'JWT_RESPONSE_PAYLOAD_HANDLER': 'account.views.jwt_response_payload_handler',
+    # 'JWT_RESPONSE_PAYLOAD_HANDLER': 'compostlab.utils.jwt.jwt_response_payload_handler',
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
 }
 
@@ -111,11 +124,12 @@ WSGI_APPLICATION = 'compostlab.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', 'NAME': 'compostlab',  #   你的数据库名称
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': '',  #   你的数据库名称
         'USER': '',  #   你的数据库用户名
         'PASSWORD': '',  #   你的数据库密码
         'HOST': '',  #   你的数据库主机，留空默认为localhost
-        'PORT': '10059',  #   你的数据库端口
+        'PORT': '',  #   你的数据库端口
     }
 }
 
@@ -158,16 +172,17 @@ USE_TZ = False
 
 # 设置静态文件目录和名称
 STATIC_URL = '/static/'
-# 加入下面代码
-STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend/static')
+]
+
 # 这个是设置静态文件夹目录的路径
-STATICFILES_FINDERS = (
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 
-    "django.contrib.staticfiles.finders.FileSystemFinder",
-
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder"
-
-)
 # 设置文件上传路径，图片上传、文件上传都会存放在此目录里
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

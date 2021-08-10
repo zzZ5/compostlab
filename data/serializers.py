@@ -5,12 +5,16 @@ from rest_framework import serializers
 
 
 class DataSerializer(serializers.ModelSerializer):
+    '''
+    序列化数据信息。
+    '''
+
     sensor = serializers.PrimaryKeyRelatedField(read_only=True)
     key = serializers.CharField(write_only=True)
 
     def validate_key(self, value):
         """
-        Check that the sensor.
+        每一次新建数据之前都要检验该数据的snesor是否合法。
         """
         try:
             sensor = Sensor.objects.get(key=value)

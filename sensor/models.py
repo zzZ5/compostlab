@@ -5,6 +5,19 @@ from django.db import models
 
 
 class Sensor(models.Model):
+    '''
+    传感器表。
+
+    Attributes：
+        name: 传感器名。
+        abbreviation: 传感器名缩写。
+        key: 传感器key(传感器标识)。
+        unit： 传感器单位。
+        type： 传感器类型。
+        descript： 传感器描述。
+        created_time: 创建时间。
+    '''
+
     name = models.CharField(max_length=128, unique=True)
     abbreviation = models.CharField(max_length=64, null=True)
     key = models.CharField(max_length=16, unique=True, null=True)
@@ -46,6 +59,15 @@ class Sensor(models.Model):
 
 
 class SensorRecord(models.Model):
+    '''
+    传感器修改记录表。
+
+    Attributes：
+        record: 具体的修改内容。
+        sensor: 修改的传感器。
+        modifier: 修改人。
+        created_time: 修改时间。
+    '''
 
     record = models.CharField(max_length=256, blank=True)
     sensor = models.ForeignKey(

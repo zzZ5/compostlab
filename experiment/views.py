@@ -19,10 +19,20 @@ from rest_framework.viewsets import GenericViewSet
 
 
 class ExperimentViewSet(GenericViewSet):
+    '''
+    提供实验表相关接口。
+    '''
+
+    # 默认查询实验表
     queryset = Experiment.objects.all()
+    # 默认序列化类为实验序列化类
     serializer_class = ExperimentSerializer
+    # 默认需要已认证权限
     permission_classes = (IsAuthenticated,)
+    # 默认的分页类为记录分页
     pagination_class = RecordPagination
+
+    # 设置默认的筛选、排序、搜索标的。
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
                        filters.OrderingFilter, filters.SearchFilter,)
     filter_fields = ('id', 'name', 'site', 'descript', 'begin_time',
@@ -33,18 +43,27 @@ class ExperimentViewSet(GenericViewSet):
     @ action(methods=['post'], detail=False, url_path='create', permission_classes=[IsAuthenticated])
     def create_experiment(self, request, version, format=None):
         '''
-        Create a new Experiment through post.
+        通过post方法新建一个实验。
+
         Example:
-            "name": "test1"
-            "site": "研究院"
-            "descript": "this is a test equipment."
-            "equipment": "[1 ]"
-            "begin_time" : "2021-04-16 13:41:35"
-            "end_time" : "2021-05-16 13:40:35"
-            "user" : [1, 2]
-            "owner" : 1
+            POST 127.0.0.1:8000/api/1.0/experiment/create/
+            {
+                "name": "test4",
+                "site": "t4",
+                "descript": "test4",
+                "equipment": [
+                    1
+                ],
+                "begin_time": "2021-05-6 13:00:35",
+                "end_time": "2021-05-16 13:40:35",
+                "user": [
+                    1,
+                    2
+                ],
+                "owner": 1
+            }
         Return:
-            if success, return equipment's information.
+            如果成功，返回该实验信息。
         '''
 
         serializer = ExperimentDetailSerializer(data=request.data)
@@ -65,11 +84,13 @@ class ExperimentViewSet(GenericViewSet):
     @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAuthenticated])
     def get_list(self, request, version, format=None):
         '''
-        Show all equipments through get.
+        通过get方法获取所有实验简略信息（分页）。
+
         Example:
             GET 127.0.0.1:8000/api/1.0/experiment/list/?page=1&size=5
+
         Return:
-            All equipments's information.
+            所有实验的信息。
         '''
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         queryset = self.get_queryset()
@@ -90,6 +111,18 @@ class ExperimentViewSet(GenericViewSet):
 
     @ action(methods=['get'], detail=False, url_path='use', permission_classes=[IsAuthenticated])
     def get_use(self, request, version, format=None):
+        '''
+        通过get方法获取所有自己所在实验的简略信息（分页）。
+
+        Example:
+            GET 127.0.0.1:8000/api/1.0/experiment/use/?page=1&size=5
+
+        Return:
+            所有自己所在实验的简略信息。
+        '''
+
+        # TODO 将该方法和get_list()合并
+
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiments = request.user.experiment_use
         page_list = self.paginate_queryset(experiments)
@@ -107,6 +140,18 @@ class ExperimentViewSet(GenericViewSet):
 
     @ action(methods=['get'], detail=False, url_path='own', permission_classes=[IsAuthenticated])
     def get_own(self, request, version, format=None):
+        '''
+        通过get方法获取所有自己所创建实验的简略信息（分页）。
+
+        Example:
+            GET 127.0.0.1:8000/api/1.0/experiment/use/?page=1&size=5
+
+        Return:
+            所有自己所创建实验的简略信息。
+        '''
+
+        # TODO 将该方法和get_list()合并
+
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiments = request.user.experiment_own
         page_list = self.paginate_queryset(experiments)
@@ -124,12 +169,25 @@ class ExperimentViewSet(GenericViewSet):
 
     @ action(methods=['get'], detail=True, url_path='detail', permission_classes=[IsAuthenticated])
     def get(self, request, version, pk, format=None):
-        # to judge whether this user can view this experiment or not(just owner or user qualified)
+        '''
+        通过get方法获取单个实验的详细信息（需要提供实验id）。
+
+        Example:
+            GET 127.0.0.1:8000/api/1.0/experiment/2/detail/
+
+        Return:
+            实验的详细信息。
+        '''
+
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = self.get_object()
+
+        # 调整实验的状态
         if experiment.status == 1:
             if experiment.end_time < datetime.datetime.now():
                 experiment.status = 2
+
+        # 判断该用户是否可以查看该实验信息
         if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
             serializer = ExperimentDetailSerializer(experiment)
             response_dict['message'] = 'Success'
@@ -143,25 +201,26 @@ class ExperimentViewSet(GenericViewSet):
     @ action(methods=['put'], detail=True, url_path='update', permission_classes=[IsAuthenticated])
     def put(self, request, version, pk, format=None):
         '''
-        Update experiment's information.
+        通过put方法修改实验信息。
+
         Example:
-        {
-            "name": "test2",
-            "site": "t2",
-            "descript": "test2",
-            "equipment": [
-                1
-            ],
-            "begin_time": "2021-05-6 13:00:35",
-            "end_time": "2021-05-16 13:40:35",
-            "user": [
-                1,
-                2
-            ],
-            "owner": 1
-        }
+            PUT 127.0.0.1:8000/api/1.0/experiment/2/update/
+            {
+                "name": "test2",
+                "site": "t2",
+                "descript": "test2",
+                "equipment": [
+                    1
+                ],
+                "begin_time": "2021-05-6 13:00:35",
+                "end_time": "2021-05-16 13:40:35",
+                "user": [
+                    1
+                ],
+                "owner": 1
+            }
         Return:
-            Expeiment's information.
+            最新的实验信息。
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
@@ -186,23 +245,28 @@ class ExperimentViewSet(GenericViewSet):
     @ action(methods=['post'], detail=True, url_path='review', permission_classes=[IsAdminUser])
     def review(self, request, version, pk, format=None):
         '''
-        review experiment.
+        审核实验，需要管理员权限。
+
         Example:
-        {
-            "equipment": 1,
-            "is_passed": true,
-            "reply": "ok"
-        }
+            POST 127.0.0.1:8000/api/1.0/experiment/2/review/
+            {
+                "is_passed": true,
+                "reply": "ok"
+            }
+
         Return:
-            review's information.
+            审核信息。
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = self.get_object()
+
+        # 先删除已有的审核表。
         try:
             experiment.review.delete()
         except:
             pass
+
         serializer = ReviewSerializer(
             data={**request.data, 'user': request.user.id, 'experiment': experiment.id})
 
@@ -221,19 +285,26 @@ class ExperimentViewSet(GenericViewSet):
     @ action(methods=['post'], detail=True, url_path='cmd', permission_classes=[IsAuthenticated])
     def public_cmd(self, request, version, pk, format=None):
         '''
-        public cmd to equipment.
-        Example:
-            equipment:[1]
-            cmd:reset
-            heater:on
-        Return:
+        批量发送指令给设备。
 
+        Example:
+            POST 127.0.0.1:8000/api/1.0/experiment/4/cmd/
+            {
+                equipments: [1, 2]    //要发送指令的设备。
+                cmd: reset
+                heater: on
+            }
+
+        Return:
+            成功与否。
         '''
 
         response_dict = {'code': 200, 'message': 'ok', 'data': []}
         experiment = self.get_object()
         equipments = []
         data = request.data.copy()
+
+        # 判断设备是否都合理
         try:
             equipment_id = data.pop('equipment')
             for i in equipment_id:
@@ -242,11 +313,14 @@ class ExperimentViewSet(GenericViewSet):
             response_dict['code'] = 400
             response_dict['message'] = 'Error equipment'
             return Response(data=response_dict, status=status.HTTP_400_BAD_REQUEST)
-        if experiment.status <= 0:
+
+        # 判断实验是否正在进行
+        if experiment.status != 1:
             response_dict['code'] = 403
             response_dict['message'] = 'Access prohibited due to status of this experiment'
             return Response(data=response_dict, status=status.HTTP_403_FORBIDDEN)
 
+        # 判断用户是否有权限
         if request.user in experiment.user.all() or request.user == experiment.owner or request.user.is_superuser or request.user.is_staff:
             if experiment.status == 1:
                 if experiment.end_time < datetime.datetime.now():

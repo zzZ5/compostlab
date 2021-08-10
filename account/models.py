@@ -10,6 +10,7 @@ from django.db import models
 class UserRecord(models.Model):
     '''
     用户修改记录表。
+
     Attributes：
         user: 修改人。
         record: 具体的修改内容。

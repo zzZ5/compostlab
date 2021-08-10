@@ -9,11 +9,11 @@ def save_user_record(name, old, new, user):
     '''
     保存用户修改记录.
 
-    Parameter:
+    Args:
         name: 修改的属性名称。
         old: 修改前的内容。
         new: 修改后的内容。
-        user: 修改人。
+        user: 要修改的用户。
 
     Return:
         Bool:  True已保存记录, False修改后和修改前相同，未保存记录。
