@@ -22,7 +22,9 @@ from compostlab.utils.jwt import obtain_jwt_token
 # 分配路由
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # 首页直接使用vue.js生成的index.html文件
     path('', TemplateView.as_view(template_name='index.html')),
+    # 登陆并获取token使用jwt自带的方法
     path('api/<version>/login/', obtain_jwt_token),
     path('api/<version>/account/', include('account.urls')),
     path('api/<version>/data/', include('data.urls')),
