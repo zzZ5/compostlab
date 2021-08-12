@@ -105,6 +105,36 @@ class UserViewSet(GenericViewSet):
         response_dict['data'] = serializer.data
         return Response(data=response_dict, status=status.HTTP_200_OK)
 
+    @ action(methods=['get'], detail=False, url_path='list', permission_classes=[IsAuthenticated])
+    def get_list(self, request, version, format=None):
+        '''
+        通过get方法获取所有账号的信息（分页获取）。
+
+        Example:
+            GET 127.0.0.1:8000/api/1.0/account/list/?page=1&size=5
+
+        Return:
+            所有账号信息。
+        '''
+
+        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        queryset = self.get_queryset()
+        equipments = self.filter_queryset(queryset)
+        page_list = self.paginate_queryset(equipments)
+
+        serializer = self.get_serializer(page_list, many=True)
+
+        response_dict['code'] = 200
+        response_dict['message'] = 'Success'
+        data_dict = {'list': serializer.data, 'pagination': {}}
+        data_dict['pagination']['current_page'] = self.paginator.page.number
+        data_dict['pagination']['num_pages'] = self.paginator.page.paginator.num_pages
+        data_dict['pagination']['per_page'] = self.paginator.page.paginator.per_page
+        data_dict['pagination']['total_size'] = len(equipments)
+        response_dict['data'] = data_dict
+
+        return Response(data=response_dict, status=status.HTTP_200_OK)
+
     @ action(methods=['put'], detail=False, url_path='update')
     def put(self, request, version, format=None):
         '''
