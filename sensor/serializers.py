@@ -69,9 +69,7 @@ class SensorSerializer(serializers.ModelSerializer):
 
     def get_data_latest(self, obj):
         # 获取传感器最新一个数据。
-        res = []
-        if obj.data.all():
-            res = DataSerializer(obj.data.latest()).data
+        res = DataSerializer(obj.data.latest()).data
         return res
 
     def update(self, instance, validated_data, modifier):
