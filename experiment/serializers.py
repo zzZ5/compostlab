@@ -1,4 +1,9 @@
+import dateutil.parser
+import pytz
+
+
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from account.serializers import UserSerializer
 from compostlab.utils.relatedfield import RelatedFieldAlternative
@@ -77,6 +82,8 @@ class ExperimentDetailSerializer(serializers.ModelSerializer):
 
         begin_time = validated_data.get('begin_time', instance.begin_time)
         if save_experiment_record('begin_time', instance.begin_time, begin_time, modifier, instance):
+            begin_time = dateutil.parser.parse(begin_time)
+            print(begin_time)
             instance.begin_time = begin_time
 
         end_time = validated_data.get('end_time', instance.end_time)
