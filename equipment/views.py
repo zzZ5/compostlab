@@ -2,6 +2,9 @@ import datetime
 import hashlib
 import json
 import random
+import numpy as np
+from numpy.ma.core import common_fill_value
+import statsmodels.stats.api as sms
 import time
 
 from compostlab.utils.pagination import RecordPagination
@@ -11,6 +14,7 @@ from equipment.serializers import EquipmentDetailSerializer, EquipmentSerializer
 from experiment.models import Experiment
 from data.serializers import DataSerializer
 from sensor.serializers import SensorSerializer
+
 
 import django_filters.rest_framework
 from rest_framework import filters
@@ -244,7 +248,7 @@ class EquipmentViewSet(GenericViewSet):
             该设备的属于这个实验的全部数据。
         '''
 
-        response_dict = {'code': 200, 'message': 'ok', 'data': []}
+        response_dict = {'code': 200, 'message': 'ok', 'data': {}}
         equipment = self.get_object()
 
         experiment_id = request.query_params.get('experiment')
@@ -296,8 +300,24 @@ class EquipmentViewSet(GenericViewSet):
                 temp.update({'data': dataSerializer.data})
                 data.append(temp)
 
+            data_conf = []
+            for i in range(len(data[0]['data'])):
+                temp = []
+                numbers = [j['data'][i]['value'] for j in data]
+                temp.append(data[0]['data'][i]['measured_time'])
+                mean = np.mean(numbers)
+                temp.append(mean)
+                conf = sms.DescrStatsW(numbers).tconfint_mean()
+                temp.append(conf[0])
+                temp.append(conf[1])
+                data_conf.append(temp)
+            serializer = EquipmentDetailSerializer(equipment)
+            response_dict['data'] = serializer.data
+            response_dict['data']['begin_time'] = begin_time
+            response_dict['data']['end_time'] = end_time
             response_dict['message'] = 'Success'
-            response_dict['data'] = data
+            response_dict['data']['unit'] = data[0]['unit']
+            response_dict['data']['data'] = data_conf
             return Response(data=response_dict, status=status.HTTP_200_OK)
 
         response_dict['code'] = 403
