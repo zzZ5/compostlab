@@ -13,7 +13,7 @@ class DataAdmin(admin.ModelAdmin):
         ('value', {'fields': ['value']}),
         ('time', {'fields': ['measured_time', 'created_time']}),
     ]
-    readonly_fields = ['measured_time', 'created_time']
+    readonly_fields = ['created_time']
     date_hierarchy = 'measured_time'
 
 

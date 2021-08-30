@@ -3,7 +3,6 @@ import hashlib
 import json
 import random
 import numpy as np
-from numpy.ma.core import common_fill_value
 import statsmodels.stats.api as sms
 import time
 
@@ -313,8 +312,10 @@ class EquipmentViewSet(GenericViewSet):
                 data_conf.append(temp)
             serializer = EquipmentDetailSerializer(equipment)
             response_dict['data'] = serializer.data
-            response_dict['data']['begin_time'] = begin_time
-            response_dict['data']['end_time'] = end_time
+            response_dict['data']['begin_time'] = begin_time.strftime(
+                "%Y-%m-%d %H:%M:%S")
+            response_dict['data']['end_time'] = end_time.strftime(
+                "%Y-%m-%d %H:%M:%S")
             response_dict['message'] = 'Success'
             response_dict['data']['unit'] = data[0]['unit']
             response_dict['data']['data'] = data_conf
