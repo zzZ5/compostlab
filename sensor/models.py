@@ -24,17 +24,21 @@ class Sensor(models.Model):
 
     TEMPERQTURE = 'T'
     HUMIDITY = 'H'
+    CO2 = 'CO2'
     TYPE_CHOICE = (
         (TEMPERQTURE, "Temperature Sensor"),
-        (HUMIDITY, "Humidity Sensor")
+        (HUMIDITY, "Humidity Sensor"),
+        (CO2, "CO2 Sensor")
     )
 
     CELSIUS = '℃'
     PERCENT = '%'
+    PPM = 'ppm'
 
     UNIT_CHOICE = (
         (CELSIUS, "Celsius"),
-        (PERCENT, "Percent")
+        (PERCENT, "Percent"),
+        (PPM, "ppm")
     )
 
     unit = models.CharField(
