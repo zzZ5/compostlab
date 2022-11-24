@@ -58,19 +58,13 @@ class SensorSerializer(serializers.ModelSerializer):
     将传感器信息序列化，主要用于传感器的创建、修改以及传输信息到前端。
     '''
 
-    data_latest = serializers.SerializerMethodField(read_only=True)
     key = serializers.CharField(read_only=True)
 
     class Meta:
         model = Sensor
         fields = ('id', 'name', 'abbreviation', 'key', 'type', 'unit',
-                  'descript', 'equipment', 'data_latest', 'created_time')
+                  'descript', 'equipment',  'created_time')
         # depth = 1
-
-    def get_data_latest(self, obj):
-        # 获取传感器最新一个数据。
-        res = DataSerializer(obj.data.latest()).data
-        return res
 
     def update(self, instance, validated_data, modifier):
         # 更新传感器信息时调用该方法，每个属性只要有改变都会记录下来。
