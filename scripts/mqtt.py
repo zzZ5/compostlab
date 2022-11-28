@@ -7,6 +7,7 @@ from threading import Thread
 
 from data.serializers import DataSerializer
 
+from django.core.mail import send_mail
 import paho.mqtt.client as mqtt
 
 
@@ -48,7 +49,7 @@ class Mqtt():
         '''
         topic一般组成为 compostlab/{key}/{method}/{path}
         其中 key: 设备key或者传感器key。
-            method： 和request的method类似。
+            method: 和equest的method类似。
             path: 其他指令
         '''
 
@@ -61,7 +62,10 @@ class Mqtt():
         equipment_key = topic[1]
         method = topic[2]
         path = topic[3]
-        data = json.loads(msg.payload)
+        try:
+            data = json.loads(msg.payload)
+        except:
+            data = {}
         # print(data)
 
         # 新建一个线程处理接受到的信息
@@ -91,6 +95,9 @@ def do_cmd(equipment_key, method, path, data):
         if serializer.is_valid():
             # Successfully created
             serializer.save()
+    elif method == 'alert':
+        print(send_mail('alert', equipment_key + ": " + str(data), 'baoju_liu@foxmail.com',
+                        ['1450791278@qq.com']))
     else:
         return
 
