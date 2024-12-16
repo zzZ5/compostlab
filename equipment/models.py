@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Equipment(models.Model):
-    '''
+    """
     设备表。
 
     Attributes：
@@ -13,18 +13,16 @@ class Equipment(models.Model):
         key: 设备key(设备标识)。
         descript： 设备描述。
         created_time: 创建时间。
-    '''
+    """
 
+    id = models.AutoField(primary_key=True)  # 或者 IntegerField
     name = models.CharField(max_length=128, unique=True)
     abbreviation = models.CharField(max_length=64, null=True)
     key = models.CharField(max_length=16, unique=True, null=True)
 
-    REACTOR = 'RE'
-    TYPE_CHOICE = (
-        (REACTOR, "Reactor"),
-    )
-    type = models.CharField(
-        max_length=32, choices=TYPE_CHOICE, default=REACTOR)
+    REACTOR = "RE"
+    TYPE_CHOICE = ((REACTOR, "Reactor"),)
+    type = models.CharField(max_length=32, choices=TYPE_CHOICE, default=REACTOR)
 
     descript = models.CharField(max_length=256, null=True)
     created_time = models.DateTimeField(auto_now_add=True)
@@ -40,10 +38,14 @@ class Equipment(models.Model):
         ordering = ["-created_time"]
         verbose_name = "Equipment"
         verbose_name_plural = "Equipments"
+        indexes = [
+            models.Index(fields=["type"]),
+            models.Index(fields=["created_time"]),
+        ]
 
 
 class EquipmentRecord(models.Model):
-    '''
+    """
     设备修改记录表。
 
     Attributes：
@@ -51,13 +53,13 @@ class EquipmentRecord(models.Model):
         equipment: 修改的设备。
         modifier: 修改人。
         created_time: 修改时间。
-    '''
+    """
 
     record = models.CharField(max_length=256, blank=True)
     equipment = models.ForeignKey(
-        Equipment, null=True, on_delete=models.CASCADE, related_name='%(class)s')
-    modifier = models.ForeignKey(
-        User, null=True, on_delete=models.SET_NULL)
+        Equipment, null=True, on_delete=models.CASCADE, related_name="%(class)s"
+    )
+    modifier = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

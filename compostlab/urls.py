@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import TemplateView
 from compostlab.utils.jwt import obtain_jwt_token
+import debug_toolbar
 
 # 分配路由
 urlpatterns = [
@@ -31,4 +32,6 @@ urlpatterns = [
     path("api/<version>/equipment/", include("equipment.urls")),
     path("api/<version>/experiment/", include("experiment.urls")),
     path("api/<version>/sensor/", include("sensor.urls")),
+    path("__debug__/", include(debug_toolbar.urls)),
 ]
+6

@@ -6,7 +6,7 @@ from django.db import models
 
 
 class Experiment(models.Model):
-    '''
+    """
     实验表。
 
     Attributes：
@@ -20,19 +20,18 @@ class Experiment(models.Model):
         owmer: 实验所有者（实验创建人）。
         status： 实验状态。
         created_time: 创建时间。
-    '''
+    """
 
     name = models.CharField(max_length=128, unique=True)
     site = models.CharField(max_length=128)
     descript = models.CharField(max_length=256, null=True)
-    equipment = models.ManyToManyField(
-        Equipment,  blank=True, related_name='%(class)s')
+    equipment = models.ManyToManyField(Equipment, blank=True, related_name="%(class)s")
     begin_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
-    user = models.ManyToManyField(
-        User,  related_name='%(class)s_use')
+    user = models.ManyToManyField(User, related_name="%(class)s_use")
     owner = models.ForeignKey(
-        User, null=True, on_delete=models.SET_NULL, related_name='%(class)s_own')
+        User, null=True, on_delete=models.SET_NULL, related_name="%(class)s_own"
+    )
 
     # 实验状态包括以下四个
     FAILED = -1
@@ -43,7 +42,7 @@ class Experiment(models.Model):
         (FAILED, "Failed"),
         (APPLYING, "Applying"),
         (DOING, "Doing"),
-        (DONE, "Done")
+        (DONE, "Done"),
     )
     status = models.IntegerField(choices=STATUS_CHOICE, default=APPLYING)
 
@@ -63,10 +62,14 @@ class Experiment(models.Model):
         ordering = ["-created_time"]
         verbose_name = "Experiment"
         verbose_name_plural = "Experiments"
+        indexes = [
+            models.Index(fields=["status"]),
+            models.Index(fields=["created_time"]),
+        ]
 
 
 class ExperimentRecord(models.Model):
-    '''
+    """
     实验修改记录表。
 
     Attributes：
@@ -74,13 +77,13 @@ class ExperimentRecord(models.Model):
         experiment: 修改的实验。
         modifier: 修改人。
         created_time: 修改时间。
-    '''
+    """
 
     record = models.CharField(max_length=256, blank=True)
     experiment = models.ForeignKey(
-        Experiment, null=True, on_delete=models.CASCADE, related_name='%(class)s')
-    modifier = models.ForeignKey(
-        User, null=True, on_delete=models.SET_NULL)
+        Experiment, null=True, on_delete=models.CASCADE, related_name="%(class)s"
+    )
+    modifier = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -94,7 +97,7 @@ class ExperimentRecord(models.Model):
 
 
 class Review(models.Model):
-    '''
+    """
     实验审核表。
 
     Attributes：
@@ -103,14 +106,14 @@ class Review(models.Model):
         reply: 回复。
         user: 审核人。
         created_time: 创建时间。
-    '''
+    """
 
-    experiment = OneToOneField(
-        Experiment, null=False, on_delete=models.CASCADE)
+    experiment = OneToOneField(Experiment, null=False, on_delete=models.CASCADE)
     is_passed = models.BooleanField(null=True)
     reply = models.CharField(max_length=128)
     user = models.ForeignKey(
-        User, null=True, on_delete=models.SET_NULL, related_name='%(class)s')
+        User, null=True, on_delete=models.SET_NULL, related_name="%(class)s"
+    )
     created_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
