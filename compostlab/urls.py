@@ -13,22 +13,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic.base import TemplateView
+from django.views.generic.base import RedirectView, TemplateView
 from compostlab.utils.jwt import obtain_jwt_token
-
 
 # 分配路由
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     # 首页直接使用vue.js生成的index.html文件
-    path('', TemplateView.as_view(template_name='index.html')),
+    path("", TemplateView.as_view(template_name="index.html")),
+    path("favicon.ico", RedirectView.as_view(url="/static/favicon.ico")),
     # 登陆并获取token使用jwt自带的方法
-    path('api/<version>/login/', obtain_jwt_token),
-    path('api/<version>/account/', include('account.urls')),
-    path('api/<version>/data/', include('data.urls')),
-    path('api/<version>/equipment/', include('equipment.urls')),
-    path('api/<version>/experiment/', include('experiment.urls')),
-    path('api/<version>/sensor/', include('sensor.urls'))
+    path("api/<version>/login/", obtain_jwt_token),
+    path("api/<version>/account/", include("account.urls")),
+    path("api/<version>/data/", include("data.urls")),
+    path("api/<version>/equipment/", include("equipment.urls")),
+    path("api/<version>/experiment/", include("experiment.urls")),
+    path("api/<version>/sensor/", include("sensor.urls")),
 ]
