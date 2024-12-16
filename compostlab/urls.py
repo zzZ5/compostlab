@@ -16,7 +16,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic.base import RedirectView, TemplateView
+from django.views.generic.base import TemplateView
 from compostlab.utils.jwt import obtain_jwt_token
 
 # 分配路由
@@ -24,7 +24,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # 首页直接使用vue.js生成的index.html文件
     path("", TemplateView.as_view(template_name="index.html")),
-    path("favicon.ico", RedirectView.as_view(url="/static/favicon.ico")),
     # 登陆并获取token使用jwt自带的方法
     path("api/<version>/login/", obtain_jwt_token),
     path("api/<version>/account/", include("account.urls")),
