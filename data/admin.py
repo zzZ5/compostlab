@@ -19,6 +19,8 @@ class DataAdmin(admin.ModelAdmin):
         ("time", {"fields": ["measured_time"]}),
     ]
 
+    paginator = LargeTablePaginator
+
 
 # 将数据表注册到管理员界面。
 admin.site.register(Data, DataAdmin)
