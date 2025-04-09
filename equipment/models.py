@@ -21,7 +21,8 @@ class Equipment(models.Model):
     key = models.CharField(max_length=16, unique=True, null=True)
 
     REACTOR = "RE"
-    TYPE_CHOICE = ((REACTOR, "Reactor"),)
+    COMPASS = "CP"
+    TYPE_CHOICE = ((REACTOR, "Reactor"),(COMPASS, "Compass"))
     type = models.CharField(max_length=32, choices=TYPE_CHOICE, default=REACTOR)
 
     descript = models.CharField(max_length=256, null=True)
