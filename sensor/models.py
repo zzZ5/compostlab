@@ -25,17 +25,27 @@ class Sensor(models.Model):
     TEMPERQTURE = "T"
     HUMIDITY = "H"
     CO2 = "CO2"
+    CO = "CO"
+    O2 = "O2"
+    CH4 = "CH4"
+    H2S = "H2S"
     TYPE_CHOICE = (
         (TEMPERQTURE, "Temperature Sensor"),
         (HUMIDITY, "Humidity Sensor"),
         (CO2, "CO2 Sensor"),
+        (CO, "CO Sensor"),
+        (O2, "O2 Sensor"),
+        (CH4, "CH4 Sensor"),
+        (H2S, "H2S Sensor"),
     )
 
     CELSIUS = "℃"
     PERCENT = "%"
     PPM = "ppm"
+    VOL = "%VOL"
+    LEL = "%LEL"
 
-    UNIT_CHOICE = ((CELSIUS, "Celsius"), (PERCENT, "Percent"), (PPM, "ppm"))
+    UNIT_CHOICE = ((CELSIUS, "Celsius"), (PERCENT, "Percent"), (PPM, "ppm"), (VOL, "VOL"), (LEL, "LEL"))
 
     unit = models.CharField(max_length=32, choices=UNIT_CHOICE, default=CELSIUS)
     type = models.CharField(max_length=32, choices=TYPE_CHOICE, default=TEMPERQTURE)
