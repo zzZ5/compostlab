@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+import compostlab
+
 
 class Equipment(models.Model):
     """
@@ -22,7 +24,18 @@ class Equipment(models.Model):
 
     REACTOR = "RE"
     COMPASS = "CP"
-    TYPE_CHOICE = ((REACTOR, "Reactor"),(COMPASS, "Compass"))
+    COMPOSTLAB500 = "CP500"
+    TYPE_CHOICE = (
+        (REACTOR, "Reactor"),
+        (COMPASS, "Compass"),
+        (COMPOSTLAB500, "compostlab500"),
+    )
+    type = models.CharField(max_length=16, choices=TYPE_CHOICE, default=REACTOR)
+    TYPE_CHOICE = (
+        (REACTOR, "Reactor"),
+        (COMPASS, "Compass"),
+        (COMPOSTLAB500, "compostlab500"),
+    )
     type = models.CharField(max_length=32, choices=TYPE_CHOICE, default=REACTOR)
 
     descript = models.CharField(max_length=256, null=True)
